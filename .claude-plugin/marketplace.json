@@ -1,18 +1,14 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "scratch-skills",
-  "description": "Claude Code plugins for Scratch programming",
   "owner": {
     "name": "yokobond"
   },
   "plugins": [
     {
       "name": "scratch-programming",
+      "source": "./",
       "description": "Automates Scratch programming by injecting blocks directly into the web editor's VM via Playwright. Enables Claude to programmatically create and run Scratch projects.",
-      "category": "development",
-      "source": ".",
-      "homepage": "https://github.com/yokobond/scratch-skills",
-      "tags": ["community-managed"]
+      "version": "1.0.0"
     }
   ]
 }
