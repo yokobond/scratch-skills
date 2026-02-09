@@ -1,0 +1,7 @@
+{
+  "name": "scratch-programming",
+  "description": "Automates Scratch programming by injecting blocks directly into the web editor's VM via Playwright. Use this plugin when you need to create or run Scratch programs with LLM assistance.",
+  "author": {
+    "name": "ky"
+  }
+}
