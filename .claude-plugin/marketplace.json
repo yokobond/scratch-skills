@@ -9,6 +9,12 @@
       "source": "./",
       "description": "Automates Scratch programming by injecting blocks directly into the web editor's VM via Playwright. Enables Claude to programmatically create and run Scratch projects.",
       "version": "1.0.0"
+    },
+    {
+      "name": "scratch-block-dragging",
+      "source": "./",
+      "description": "Builds Scratch programs by dragging and dropping blocks from the palette to the script area using Playwright mouse operations.",
+      "version": "1.0.0"
     }
   ]
 }
