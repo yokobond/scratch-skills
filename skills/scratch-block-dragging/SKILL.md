@@ -36,6 +36,23 @@ Given a block's bounding box `(left, top, width, height)` and `scale = workspace
 
 **To insert block B inside a C-block:** drop block B at the C-block's **substack** point: `(C.left + 24*scale, C.top + 48*scale)`.
 
+## Prerequisites
+
+This skill requires the **Playwright MCP server** to be installed and configured. Ensure the following is added to your MCP settings (e.g. `~/.claude/claude_desktop_config.json` or project `.mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@anthropic-ai/mcp-playwright@latest"]
+    }
+  }
+}
+```
+
+If the browser is not installed, run `browser_install` first to download the required Chromium binary.
+
 ## When to Use
 
 - When you want to visually demonstrate how to build a Scratch program

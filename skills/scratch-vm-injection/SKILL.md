@@ -7,6 +7,23 @@ description: Automates Scratch programming by injecting blocks directly into the
 
 This skill programs Scratch (scratch.mit.edu) by directly interacting with the Scratch Virtual Machine (VM) running in the browser via the Playwright MCP tools.
 
+## Prerequisites
+
+This skill requires the **Playwright MCP server** to be installed and configured. Ensure the following is added to your MCP settings (e.g. `~/.claude/claude_desktop_config.json` or project `.mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@anthropic-ai/mcp-playwright@latest"]
+    }
+  }
+}
+```
+
+If the browser is not installed, run `browser_install` first to download the required Chromium binary.
+
 ## Workflow
 
 ### 1. Open Scratch Editor
