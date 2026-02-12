@@ -1,9 +1,9 @@
 ---
-name: scratch-programming
+name: scratch-vm-injection
 description: Automates Scratch programming by injecting blocks directly into the web editor's VM. Use this skill when you need to create or run Scratch programs programmatically.
 ---
 
-# Scratch Programming Skill
+# Scratch VM Injection Skill
 
 This skill programs Scratch (scratch.mit.edu) by directly interacting with the Scratch Virtual Machine (VM) running in the browser via the Playwright MCP tools.
 

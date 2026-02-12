@@ -1,15 +1,16 @@
-# scratch-programming
+# scratch-skills
 
-A Claude Code plugin that automates Scratch programming by injecting blocks directly into the web editor's VM via Playwright.
+A Claude Code plugin that automates Scratch programming via Playwright.
 
-## What it does
+## Skills
 
-This plugin enables Claude to programmatically create and run Scratch programs by:
+### scratch-vm-injection
 
-1. Opening the Scratch editor (scratch.mit.edu)
-2. Connecting to the Scratch VM through React internals
-3. Injecting block JSON directly into sprites
-4. Running the project with `vm.greenFlag()`
+Injects blocks directly into the Scratch VM by serializing/deserializing the project JSON. Best for programmatically creating complete Scratch programs quickly.
+
+### scratch-block-dragging
+
+Builds Scratch programs by dragging and dropping blocks from the palette to the script area using mouse operations. Mimics real user interaction with the Scratch editor UI.
 
 ## Requirements
 
@@ -28,7 +29,7 @@ First, add the marketplace:
 Then install the plugin:
 
 ```
-/install-plugin scratch-programming
+/install-plugin scratch-vm-injection
 ```
 
 ### From URL
@@ -49,7 +50,7 @@ Scratchで猫が四角形を描くプログラムを作って
 Make a Scratch project where the cat bounces around the screen
 ```
 
-The plugin handles all the low-level VM interaction — finding the VM instance, serializing/deserializing the project JSON, and injecting blocks — so you can focus on describing what you want.
+The plugin handles all the low-level interaction — finding the VM instance, block manipulation, and project management — so you can focus on describing what you want.
 
 ## License
 
