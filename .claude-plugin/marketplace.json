@@ -11,7 +11,8 @@
       "version": "1.0.0",
       "skills": [
         "./skills/scratch-vm-injection",
-        "./skills/scratch-block-dragging"
+        "./skills/scratch-block-dragging",
+        "./skills/scratch-multi-sprite-drawing"
       ]
     }
   ]
