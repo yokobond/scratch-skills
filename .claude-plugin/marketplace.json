@@ -10,14 +10,8 @@
       "description": "Automates Scratch programming via Playwright. Includes skills for VM injection (programmatic block creation) and block dragging (visual UI interaction).",
       "version": "1.0.0",
       "skills": [
-        {
-          "name": "scratch-vm-injection",
-          "description": "Automates Scratch programming by injecting blocks directly into the web editor's VM via Playwright. Enables Claude to programmatically create and run Scratch projects."
-        },
-        {
-          "name": "scratch-block-dragging",
-          "description": "Builds Scratch programs by dragging and dropping blocks from the palette to the script area using Playwright mouse operations."
-        }
+        "./skills/scratch-vm-injection",
+        "./skills/scratch-block-dragging"
       ]
     }
   ]
