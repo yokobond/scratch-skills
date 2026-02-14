@@ -1,6 +1,6 @@
 {
   "name": "scratch-skills",
-  "description": "Automates Scratch programming via Playwright. Includes skills for VM injection (programmatic block creation) and block dragging (visual UI interaction).",
+  "description": "Skills for Scratch programming automation. Includes editor operation skills and coding technique skills.",
   "author": {
     "name": "Koji Yokokawa"
   }

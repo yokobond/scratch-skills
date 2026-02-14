@@ -5,13 +5,21 @@
   },
   "plugins": [
     {
-      "name": "scratch-skills",
+      "name": "scratch-operation",
       "source": "./",
-      "description": "Automates Scratch programming via Playwright. Includes skills for VM injection (programmatic block creation) and block dragging (visual UI interaction).",
+      "description": "Automates Scratch editor operations via Playwright. Includes skills for VM injection (programmatic block creation) and block dragging (visual UI interaction).",
       "version": "1.0.0",
       "skills": [
         "./skills/scratch-vm-injection",
-        "./skills/scratch-block-dragging",
+        "./skills/scratch-block-dragging"
+      ]
+    },
+    {
+      "name": "scratch-coding",
+      "source": "./",
+      "description": "Scratch programming techniques. Includes skills for coordinating multi-sprite pen drawing.",
+      "version": "1.0.0",
+      "skills": [
         "./skills/scratch-multi-sprite-drawing"
       ]
     }
