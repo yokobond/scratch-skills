@@ -6,7 +6,7 @@
   "plugins": [
     {
       "name": "scratch-operation",
-      "source": "./",
+      "source": "./plugins/scratch-operation",
       "description": "Automates Scratch editor operations via Playwright. Includes skills for VM injection (programmatic block creation) and block dragging (visual UI interaction).",
       "version": "1.0.0",
       "skills": [
@@ -16,7 +16,7 @@
     },
     {
       "name": "scratch-coding",
-      "source": "./",
+      "source": "./plugins/scratch-coding",
       "description": "Scratch programming techniques. Includes skills for coordinating multi-sprite pen drawing.",
       "version": "1.0.0",
       "skills": [

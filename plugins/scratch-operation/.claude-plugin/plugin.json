@@ -1,0 +1,7 @@
+{
+  "name": "scratch-operation",
+  "description": "Automates Scratch editor operations via Playwright. Includes skills for VM injection (programmatic block creation) and block dragging (visual UI interaction).",
+  "author": {
+    "name": "Koji Yokokawa"
+  }
+}
