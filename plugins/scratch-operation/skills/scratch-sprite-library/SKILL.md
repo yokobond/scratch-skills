@@ -125,7 +125,7 @@ After adding, rename the sprite via the VM for localized or custom names:
 () => {
   const vm = window.vm;
   const target = vm.runtime.targets.find(t => t.sprite.name === 'Hare');
-  if (target) vm.renameSprite(target.id, 'うさぎ');
+  if (target) vm.renameSprite(target.id, 'Rabbit');
   return 'Renamed';
 }
 ```
@@ -358,12 +358,12 @@ async (page) => {
   await page.evaluate(() => {
     const vm = window.vm;
     const hare = vm.runtime.targets.find(t => t.sprite.name === 'Hare');
-    if (hare) vm.renameSprite(hare.id, 'うさぎ');
+    if (hare) vm.renameSprite(hare.id, 'Rabbit');
     const frog = vm.runtime.targets.find(t => t.sprite.name === 'Frog');
-    if (frog) vm.renameSprite(frog.id, 'かめ');
+    if (frog) vm.renameSprite(frog.id, 'Turtle');
   });
 
-  return 'Added and renamed Hare → うさぎ, Frog → かめ';
+  return 'Added and renamed Hare → Rabbit, Frog → Turtle';
 }
 ```
 
@@ -374,7 +374,7 @@ async (page) => {
 - If the dialog still doesn't open, verify the selector matches by checking `document.querySelector('div[class*="sprite-selector_add-button"] button[class*="action-menu_main-button"]')` returns a non-null element.
 
 ### Sprite Not Found in Search
-- All sprite names are in **English** regardless of the editor locale. Search with English names (e.g., "Hare" not "うさぎ").
+- All sprite names are in **English** regardless of the editor locale. Always search with English names (e.g., "Hare", "Cat", "Dog").
 - The search input matches on sprite names. If no results appear, clear the search and browse by category instead.
 
 ### Adding Multiple Sprites Quickly

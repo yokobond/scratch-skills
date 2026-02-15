@@ -108,49 +108,104 @@ async (page) => {
 
 Store `window.workspaceScale` for use in subsequent connection-point calculations.
 
-### 3. Select a Block Category
+### 3. Language-Independent Element Selection
 
-Click on a category button in the left sidebar to display the blocks you need. Use `browser_click` with the category's ref from the page snapshot.
+The Scratch editor supports dynamic language switching. All UI text (block labels, category names, button labels) changes with the locale. **Never use `text=...` locators, `aria-label`, or visible text for element selection.**
 
-Categories available in the sidebar:
-- **動き** (Motion) - blue: movement, rotation, coordinates
-- **見た目** (Looks) - purple: costumes, speech, size, effects
-- **音** (Sound) - magenta: play sounds, volume
-- **イベント** (Events) - yellow: flag clicked, key pressed, messages
-- **制御** (Control) - orange: forever, if, wait, repeat, clones
-- **調べる** (Sensing) - cyan: touching, mouse position, ask, timer
-- **演算** (Operators) - green: math, random, string ops, logic
-- **変数** (Variables) - orange-red: variables, lists
+Instead, use **Blockly API** for block palette operations and **CSS class prefix matching** for GUI controls.
 
-Example:
-```
-browser_click ref="<category_ref>" element="イベントカテゴリ"
-```
+#### GUI Element Selectors
 
-### 4. Locate the Block Position
+| Element | Selector |
+|---|---|
+| Green flag button | `img[class*="green-flag_green-flag"]` |
+| Stop button | `img[class*="stop-all_stop-all"]` |
+| Category item (by ID) | `.scratchCategoryId-<id>` (e.g., `.scratchCategoryId-motion`) |
+| Selected category | `.scratchCategoryMenuItem.categorySelected` |
+| Category menu container | `.scratchCategoryMenu` |
 
-Use `browser_run_code` to find the exact bounding box of a block by searching for its text label:
+#### Block Category IDs
+
+| Category ID | Description | Color |
+|---|---|---|
+| `motion` | Movement, rotation, coordinates | blue |
+| `looks` | Costumes, speech, size, effects | purple |
+| `sound` | Play sounds, volume | magenta |
+| `events` | Flag clicked, key pressed, messages | yellow |
+| `control` | Forever, if, wait, repeat, clones | orange |
+| `sensing` | Touching, mouse position, ask, timer | cyan |
+| `operators` | Math, random, string ops, logic | green |
+| `data` | Variables, lists | orange-red |
+
+#### Block Location via Blockly API
+
+Always use block opcodes (e.g., `motion_movesteps`, `control_forever`) to identify blocks. These are language-independent.
+
+- **Palette (flyout) blocks:** `ws.getFlyout().getWorkspace().getAllBlocks().find(b => b.type === '<opcode>')`
+- **Script area blocks:** `ws.getAllBlocks().find(b => b.type === '<opcode>')`
+- **Bounding box:** `block.getSvgRoot().getBoundingClientRect()`
+
+### 4. Select a Block Category
+
+Use the Blockly Toolbox API to select a category by its internal ID. This scrolls the flyout to show that category's blocks.
 
 ```javascript
 async (page) => {
-  const el = await page.locator('text=<block_text>').first();
-  const box = await el.boundingBox();
+  await page.evaluate(() => {
+    const ws = Blockly.getMainWorkspace();
+    ws.getToolbox().setSelectedCategoryById('events');
+  });
+  return 'Selected Events category';
+}
+```
+
+**Fallback** — click the category DOM element directly:
+
+```javascript
+async (page) => {
+  await page.evaluate(() => {
+    const cat = document.querySelector('.scratchCategoryId-events');
+    if (cat) cat.click();
+  });
+  return 'Clicked Events category';
+}
+```
+
+### 5. Locate the Block Position
+
+Use `browser_run_code` with the Blockly API to find the exact bounding box of a block by its opcode:
+
+```javascript
+async (page) => {
+  const box = await page.evaluate(() => {
+    const ws = Blockly.getMainWorkspace();
+    const flyout = ws.getFlyout().getWorkspace();
+    const block = flyout.getAllBlocks().find(b => b.type === '<opcode>');
+    if (!block) throw new Error('Block not found in flyout: <opcode>');
+    const rect = block.getSvgRoot().getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+  });
   return JSON.stringify(box);
 }
 ```
 
-For example, to find "マウスのポインターへ向ける":
+For example, to find the "point towards" block:
 ```javascript
 async (page) => {
-  const el = await page.locator('text=マウスのポインター').first();
-  const box = await el.boundingBox();
+  const box = await page.evaluate(() => {
+    const ws = Blockly.getMainWorkspace();
+    const flyout = ws.getFlyout().getWorkspace();
+    const block = flyout.getAllBlocks().find(b => b.type === 'motion_pointtowards');
+    const rect = block.getSvgRoot().getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+  });
   return JSON.stringify(box);
 }
 ```
 
-**Important:** The text locator returns the first match. If the same text appears in multiple places (palette and script area), use `.nth(0)` for the palette copy.
+**Important:** Use `ws.getAllBlocks()` for blocks already in the script area, and `ws.getFlyout().getWorkspace().getAllBlocks()` for blocks in the palette.
 
-### 5. Drag a Block to the Script Area
+### 6. Drag a Block to the Script Area
 
 Use `browser_run_code` to perform a mouse drag operation. The drag must be done in small incremental steps for Scratch to properly register it.
 
@@ -292,7 +347,7 @@ async (page) => {
 - **300ms pause** before `mousedown` and before `mouseup` for Scratch to register start/end
 - **200ms pause** after `mousedown` before moving
 
-### 6. Script Area Drop Targets
+### 7. Script Area Drop Targets
 
 The script area occupies the center-right portion of the editor (approximately x: 350-680, y: 100-800 in default layout).
 
@@ -303,7 +358,7 @@ The script area occupies the center-right portion of the editor (approximately x
 
 Scratch snaps blocks when dropped within SNAP_RADIUS (48 workspace units ≈ 32px at default scale) of a valid connection point. A **white highlight line** appears when snap is available — if you see it during drag, the connection will succeed.
 
-### 7. Verify After Each Drag
+### 8. Verify After Each Drag
 
 Always take a screenshot after each drag to verify the block was placed correctly:
 
@@ -316,11 +371,18 @@ If a wrong block was dragged, undo with:
 browser_press_key key="Control+z"
 ```
 
-### 8. Run the Program
+### 9. Run the Program
 
 Click the green flag button to run the program:
-```
-browser_click ref="<green_flag_ref>" element="実行ボタン"
+
+```javascript
+async (page) => {
+  await page.evaluate(() => {
+    const flag = document.querySelector('img[class*="green-flag_green-flag"]');
+    if (flag) flag.click();
+  });
+  return 'Clicked green flag';
+}
 ```
 
 ## Complete Example: Cat Follows Mouse
@@ -328,51 +390,64 @@ browser_click ref="<green_flag_ref>" element="実行ボタン"
 Build a program where the cat walks toward the mouse pointer:
 
 ```
-🏴が押されたとき
-ずっと
-  マウスのポインターへ向ける
-  10歩動かす
-  次のコスチュームにする
+event_whenflagclicked
+  control_forever
+    motion_pointtowards (towards: _mouse_)
+    motion_movesteps (steps: 10)
+    looks_nextcostume
 ```
 
 ### Step-by-step:
 
 1. **Open editor**, detect workspace scale, and take screenshot to see the layout.
 
-2. **Click "イベント" category** to show event blocks.
-
-3. **Locate "が押されたとき"** (flag clicked) block:
+2. **Select Events category:**
    ```javascript
    async (page) => {
-     const el = await page.locator('text=が押されたとき').first();
-     const box = await el.boundingBox();
+     await page.evaluate(() => {
+       Blockly.getMainWorkspace().getToolbox().setSelectedCategoryById('events');
+     });
+     return 'Selected Events category';
+   }
+   ```
+
+3. **Locate `event_whenflagclicked`** block in the flyout:
+   ```javascript
+   async (page) => {
+     const box = await page.evaluate(() => {
+       const ws = Blockly.getMainWorkspace();
+       const flyout = ws.getFlyout().getWorkspace();
+       const block = flyout.getAllBlocks().find(b => b.type === 'event_whenflagclicked');
+       const rect = block.getSvgRoot().getBoundingClientRect();
+       return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+     });
      return JSON.stringify(box);
    }
    ```
 
 4. **Drag flag block to script area** at ~(500, 250) — approximate positioning (first block, no target to snap to).
 
-5. **Click "制御" category**, locate "ずっと" block. **Precision target** the flag block's bottom edge:
-   - Get flag block's bounding box via `.nth(1)` (script area copy)
-   - Drop at `(flagBox.x, flagBox.y + flagBox.height + 4)`
+5. **Select Control category**, locate `control_forever` block. **Precision target** the flag block's bottom edge:
+   - Get flag block via `ws.getAllBlocks().find(b => b.type === 'event_whenflagclicked')`
+   - Drop at `(flagRect.x, flagRect.bottom + 4)`
 
-6. **Click "動き" category**, locate "マウスのポインター" in the "へ向ける" block. **Precision target** the forever block's substack:
-   - Get forever block's bounding box via `.nth(1)`
-   - Drop at `(foreverBox.x + 24*scale, foreverBox.y + 48*scale)` to insert inside the C-block
+6. **Select Motion category**, locate `motion_pointtowards` block. **Precision target** the forever block's substack:
+   - Get forever block via `ws.getAllBlocks().find(b => b.type === 'control_forever')`
+   - Use SUBSTACK connection point via SVG `getScreenCTM()` to insert inside the C-block
 
-7. **Locate "歩動かす"** block. **Precision target** the "point towards" block's bottom edge:
-   - Get the "へ向ける" block's bounding box in script area
-   - Drop at `(pointBox.x, pointBox.y + pointBox.height + 4)`
+7. **Locate `motion_movesteps`** block in flyout. **Precision target** the `motion_pointtowards` block's bottom edge:
+   - Get the point-towards block via `ws.getAllBlocks().find(b => b.type === 'motion_pointtowards')`
+   - Drop at `(pointRect.x, pointRect.bottom + 4)`
 
-8. **Click "見た目" category**, locate "次のコスチュームにする". **Precision target** the "move" block's bottom edge:
-   - Get the "歩動かす" block's bounding box in script area
-   - Drop at `(moveBox.x, moveBox.y + moveBox.height + 4)`
+8. **Select Looks category**, locate `looks_nextcostume` block. **Precision target** the `motion_movesteps` block's bottom edge:
+   - Get the move block via `ws.getAllBlocks().find(b => b.type === 'motion_movesteps')`
+   - Drop at `(moveRect.x, moveRect.bottom + 4)`
 
 9. **Verify via VM** — check that all blocks are connected (no `topLevel: true` except the flag block).
 
 10. **Take screenshot** to verify the completed program visually.
 
-11. **Click the green flag** to run.
+11. **Click the green flag** via `img[class*="green-flag_green-flag"]`.
 
 ## Verifying Block Connections via VM (Safety Net)
 
@@ -472,10 +547,10 @@ async (page) => {
 ## Tips & Troubleshooting
 
 ### Wrong Block Grabbed
-The palette shows all blocks from multiple categories in a scrollable list. If you grab the wrong block, immediately undo with `Control+z` and retry with more precise coordinates. Always use `page.locator('text=...')` to get exact positions rather than guessing.
+The palette shows all blocks from multiple categories in a scrollable list. If you grab the wrong block, immediately undo with `Control+z` and retry. Always use `flyout.getAllBlocks().find(b => b.type === '<opcode>')` and `getSvgRoot().getBoundingClientRect()` for exact positions rather than guessing.
 
 ### Block Not Connecting (Most Common Issue)
-**Use precision connection-point targeting** (see Step 5) as your primary strategy. Approximate pixel coordinates almost never result in actual connections.
+**Use precision connection-point targeting** (see Step 6) as your primary strategy. Approximate pixel coordinates almost never result in actual connections.
 
 **Most critical rule: Grab blocks near their top-left corner** (`block.x + 15, block.y + 15`). Scratch preserves the mouse-to-block offset during drag. Grabbing from the center offsets the block's previous connection ~50px from the drop point, causing snap detection to fail — especially for C-block substack insertion.
 
@@ -502,13 +577,13 @@ If you see the white highlight line during drag but the block doesn't connect on
 ### Palette Scrolling
 Clicking a category button scrolls the palette to that category. After clicking, take a screenshot or locate elements again as positions may have changed.
 
-### Multiple Blocks With Same Text
-Some text appears in multiple blocks (e.g., numbers). Use the surrounding unique text to identify the correct block. For instance, search for "歩動かす" instead of "10" to find the move block.
+### Multiple Blocks of Same Type
+Some blocks share visual elements (e.g., number fields). Always use opcodes to identify blocks. For instance, use `motion_movesteps` to find the move block rather than searching by visible text.
 
 ### Coordinate Discovery Pattern
 Always follow this pattern for reliable block placement:
-1. Click the category
-2. Use `locator('text=...').boundingBox()` to find the exact position
+1. Select the category via `setSelectedCategoryById('<id>')`
+2. Use `flyout.getAllBlocks().find(b => b.type === '<opcode>').getSvgRoot().getBoundingClientRect()` to find the exact position
 3. **Calculate the drop point** from the target block's connection points (precision targeting)
 4. Drag from the found position to the calculated target
 5. Take a screenshot to verify
