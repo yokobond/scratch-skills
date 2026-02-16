@@ -260,3 +260,15 @@ When defining `inputs`, Scratch uses specific arrays for literal values:
 - **String**: `[1, [10, "hello"]]`
 - **Wait/Duration**: `[1, [5, "0.1"]]` (The `5` is often used for positive numbers/duration)
 - **Block Connection**: `[2, "BLOCK_ID"]` (The `2` indicates a connection to another block, e.g., for `SUBSTACK`)
+
+### 5. Passing Arguments and Escaping Characters
+When using `page.evaluate(fn, arg)` within `browser_run_code`, keep these in mind to avoid common errors:
+- **Single Argument Limit**: `page.evaluate` only accepts **one** argument after the function. If you need to pass multiple values (like blocks for different sprites), wrap them in a single object:
+  ```javascript
+  await page.evaluate(async ({rBlocks, tBlocks}) => {
+    await window.updateSprite('Rabbit', rBlocks);
+    await window.updateSprite('Turtle', tBlocks);
+  }, {rBlocks: rabbitBlocks, tBlocks: turtleBlocks});
+  ```
+- **Avoid Syntax Errors in Strings**: Be extremely careful with special characters like backslashes (`\`) or literal newlines inside strings when using `browser_run_code`. Unescaped `\n` or `\t` can break the code being sent to the browser, leading to `SyntaxError: Invalid or unexpected token`.
+- **Serialization**: All data passed to `page.evaluate` must be JSON-serializable. Functions or complex class instances cannot be passed this way.
