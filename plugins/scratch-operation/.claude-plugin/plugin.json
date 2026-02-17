@@ -1,6 +1,6 @@
 {
   "name": "scratch-operation",
-  "description": "Automates Scratch editor operations via Playwright. Includes skills for VM injection (programmatic block creation), block dragging (visual UI interaction), sprite library (adding sprites/backdrops), project file management (downloading/uploading .sb3 files), and custom SVG costume injection.",
+  "description": "Automates Scratch editor operations via Playwright. Includes skills for VM injection (programmatic block creation), block dragging (visual UI interaction), sprite library (adding sprites/backdrops), project file management (downloading/uploading .sb3 files), and custom costume injection (SVG/PNG).",
   "author": {
     "name": "Koji Yokokawa"
   }

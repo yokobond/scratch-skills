@@ -11,4 +11,4 @@ This extension provides low-level operation skills for the Scratch editor.
 
 - [Scratch VM Injection](./skills/scratch-vm-injection/SKILL.md): Programmatically inject blocks into the VM.
 - [Scratch Block Dragging](./skills/scratch-block-dragging/SKILL.md): Simulate mouse drag-and-drop to build scripts.
-- [Custom Costume](./skills/scratch-custom-costume/SKILL.md): Add custom SVG costumes to sprites programmatically.
+- [Custom Costume](./skills/scratch-custom-costume/SKILL.md): Add custom SVG or PNG costumes to sprites programmatically.
