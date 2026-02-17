@@ -7,20 +7,24 @@
     {
       "name": "scratch-operation",
       "source": "./plugins/scratch-operation",
-      "description": "Automates Scratch editor operations via Playwright. Includes skills for VM injection (programmatic block creation), block dragging (visual UI interaction), sprite library (adding sprites/backdrops), and project file management (downloading/uploading .sb3 files).",
+      "description": "Automates Scratch editor operations via Playwright. Includes skills for VM injection (programmatic block creation), block dragging (visual UI interaction), sprite library (adding built-in sprites/backdrops), custom costume injection (adding SVG/PNG costumes programmatically), and project file management (downloading/uploading .sb3 files).",
       "version": "1.0.0",
       "skills": [
         "./skills/scratch-vm-injection",
-        "./skills/scratch-block-dragging"
+        "./skills/scratch-block-dragging",
+        "./skills/scratch-sprite-library",
+        "./skills/scratch-custom-costume",
+        "./skills/scratch-project-file"
       ]
     },
     {
       "name": "scratch-coding",
       "source": "./plugins/scratch-coding",
-      "description": "Scratch programming techniques. Includes skills for coordinating multi-sprite pen drawing.",
+      "description": "Scratch programming patterns and techniques. Includes skills for coordinating multi-sprite pen drawing (synchronized pen clear) and storytelling with message chaining (sequential and parallel character dialog across scenes with backdrop switching).",
       "version": "1.0.0",
       "skills": [
-        "./skills/scratch-multi-sprite-drawing"
+        "./skills/scratch-multi-sprite-drawing",
+        "./skills/scratch-storytelling-messaging"
       ]
     }
   ]
