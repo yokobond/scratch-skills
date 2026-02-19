@@ -158,7 +158,7 @@ Once `window.vm` is set and `window.updateSprite` is defined, you can inject blo
 3. Modify the `blocks` object of the target sprite in the JSON.
 4. Reload the project (`vm.loadProject()`).
 
-This ensures assets (costumes/sounds) are preserved while code is updated perfectly.
+This ensures **built-in and CDN-hosted** assets (costumes/sounds) are preserved while code is updated. However, **costumes injected via the storage API** (using the **scratch-custom-costume** skill) are lost — see Tip #6 below.
 
 Use `browser_evaluate` to call `updateSprite` and then run the project:
 
@@ -261,7 +261,57 @@ When defining `inputs`, Scratch uses specific arrays for literal values:
 - **Wait/Duration**: `[1, [5, "0.1"]]` (The `5` is often used for positive numbers/duration)
 - **Block Connection**: `[2, "BLOCK_ID"]` (The `2` indicates a connection to another block, e.g., for `SUBSTACK`)
 
-### 5. Passing Arguments and Escaping Characters
+### 5. Custom Costumes and loadProject()
+
+If the project uses costumes injected via `storage.createAsset()` (the **scratch-custom-costume** skill), calling `loadProject()` — including via `updateSprite` — will **destroy those costumes**. Scratch tries to fetch every asset by md5 hash from the remote CDN, which fails for local-only assets, leaving "?" placeholders.
+
+**Fix**: Re-inject the costumes **inside the same `page.evaluate` call** immediately after `loadProject()` completes. Splitting into two separate `page.evaluate` calls risks a render gap where the broken "?" costume briefly appears. Also, always **add the new costume first, then delete old ones** — `deleteCostume` silently fails when only one costume remains.
+
+```javascript
+// browser_run_code code:
+async (page) => {
+  const svgData = `<svg ...>...</svg>`;  // keep costume data in Node.js scope
+
+  // Update blocks AND re-inject costumes in a single evaluate (no render gap)
+  await page.evaluate(async (svg) => {
+    const vm = window.vm;
+
+    // Step 1: update blocks
+    const projectJSON = JSON.parse(vm.toJSON());
+    const sprite = projectJSON.targets.find(t => !t.isStage);
+    sprite.blocks = { /* ... */ };
+    await vm.loadProject(JSON.stringify(projectJSON));
+    // NOTE: custom costumes are now lost — re-inject immediately below
+
+    // Step 2: re-inject costumes
+    const target = vm.editingTarget;
+    const storage = vm.runtime.storage;
+
+    // Record old costume count BEFORE adding new ones
+    const oldCount = target.getCostumes().length;
+
+    // Add new costume FIRST (so the list always has >1 entry during deletion)
+    const asset = storage.createAsset(
+      storage.AssetType.ImageVector, storage.DataFormat.SVG,
+      new TextEncoder().encode(svg), null, true
+    );
+    await vm.addCostume(asset.assetId + '.svg', {
+      name: 'my-costume', dataFormat: 'svg', asset,
+      md5: asset.assetId + '.svg', assetId: asset.assetId,
+      bitmapResolution: 1, rotationCenterX: 50, rotationCenterY: 50
+    });
+
+    // THEN delete old costumes (cat, "?", or any leftovers)
+    for (let i = oldCount - 1; i >= 0; i--) target.deleteCostume(i);
+
+    target.setCostume(0);
+  }, svgData);
+}
+```
+
+For PNG costumes, convert bytes to base64 before passing to `page.evaluate` (since `Uint8Array` is not JSON-serializable), then decode with `atob()` inside. See the **scratch-custom-costume** skill for the full PNG re-injection pattern.
+
+### 6. Passing Arguments and Escaping Characters
 When using `page.evaluate(fn, arg)` within `browser_run_code`, keep these in mind to avoid common errors:
 - **Single Argument Limit**: `page.evaluate` only accepts **one** argument after the function. If you need to pass multiple values (like blocks for different sprites), wrap them in a single object:
   ```javascript
