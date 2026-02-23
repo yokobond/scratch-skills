@@ -2,15 +2,24 @@
 
 A Claude Code plugin that automates Scratch programming via Playwright.
 
-## Skills
+## Plugins
 
-### scratch-vm-injection
+### scratch-operation
 
-Injects blocks directly into the Scratch VM by serializing/deserializing the project JSON. Best for programmatically creating complete Scratch programs quickly.
+Low-level skills for direct interaction with the Scratch editor.
 
-### scratch-block-dragging
+- **scratch-vm-injection** — Injects blocks directly into the Scratch VM by serializing/deserializing the project JSON. Best for programmatically creating complete Scratch programs quickly.
+- **scratch-block-dragging** — Builds Scratch programs by dragging and dropping blocks from the palette to the script area using mouse operations. Mimics real user interaction with the Scratch editor UI.
+- **scratch-sprite-library** — Add sprites and backdrops from the Scratch built-in library.
+- **scratch-custom-costume** — Add custom SVG or PNG costumes to sprites programmatically.
+- **scratch-project-file** — Download and upload Scratch project `.sb3` files.
 
-Builds Scratch programs by dragging and dropping blocks from the palette to the script area using mouse operations. Mimics real user interaction with the Scratch editor UI.
+### scratch-coding
+
+Advanced coding patterns and templates for Scratch projects.
+
+- **scratch-multi-sprite-drawing** — Coordinate multiple sprites drawing simultaneously.
+- **scratch-storytelling-messaging** — Patterns for sequential dialog and messages.
 
 ## Requirements
 
@@ -26,10 +35,14 @@ First, add the marketplace:
 /plugins add-marketplace yokobond/scratch-skills
 ```
 
-Then install the plugin:
+Then install the desired plugin:
 
 ```
-/install-plugin scratch-vm-injection
+/install-plugin scratch-operation
+```
+
+```
+/install-plugin scratch-coding
 ```
 
 ### From URL
