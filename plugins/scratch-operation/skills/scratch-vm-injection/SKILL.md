@@ -322,3 +322,14 @@ When using `page.evaluate(fn, arg)` within `browser_run_code`, keep these in min
   ```
 - **Avoid Syntax Errors in Strings**: Be extremely careful with special characters like backslashes (`\`) or literal newlines inside strings when using `browser_run_code`. Unescaped `\n` or `\t` can break the code being sent to the browser, leading to `SyntaxError: Invalid or unexpected token`.
 - **Serialization**: All data passed to `page.evaluate` must be JSON-serializable. Functions or complex class instances cannot be passed this way.
+
+### 7. Syncing Editor UI
+
+When injecting blocks using `target.blocks.createBlock` or modifying the block model directly (instead of using `loadProject`), the Scratch editor UI (Blockly workspace) may not reflect the changes immediately. To force a UI update, call:
+
+```javascript
+window.vm.emitWorkspaceUpdate();
+```
+
+This is particularly useful when developing extensions or using internal APIs where a full project reload is overkill.
+
