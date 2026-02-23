@@ -21,6 +21,16 @@ Advanced coding patterns and templates for Scratch projects.
 - **scratch-multi-sprite-drawing** — Coordinate multiple sprites drawing simultaneously.
 - **scratch-storytelling-messaging** — Patterns for sequential dialog and messages.
 
+## Meta-Skills
+
+### scratch-skill-creator
+
+Guides a vibe coding session that produces both a working Scratch program and a new reusable `SKILL.md`. Use this to grow the `scratch-operation` or `scratch-coding` plugin with patterns discovered during live coding.
+
+### scratch-skill-tester
+
+Spawns an autonomous sub-agent that implements a test Scratch program using only a newly written skill, then reports whether the skill's documentation is accurate, complete, and sufficient to produce working code. Run this immediately after `scratch-skill-creator` produces a new skill.
+
 ## Requirements
 
 - [Playwright plugin](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/playwright) installed in Claude Code
