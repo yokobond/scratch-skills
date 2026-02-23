@@ -333,3 +333,29 @@ window.vm.emitWorkspaceUpdate();
 
 This is particularly useful when developing extensions or using internal APIs where a full project reload is overkill.
 
+### 8. Shadow Blocks (Important)
+
+When defining shadow blocks (e.g., dropdown menus, number inputs) in your `blocks` object, follow these rules to ensure they are correctly rendered and persisted:
+
+1.  **Correct Opcode**: Ensure you use the exact internal opcode (e.g., `note` for music notes, `motion_direction_menu` for direction dropdowns).
+2.  **Parent Relationship**: A shadow block MUST have its parent block's ID in its `parent` property.
+3.  **Field Format**: Use the array format `[value, null]` for fields within shadow blocks.
+4.  **Input Connection**: Connect the shadow in the parent block's `inputs` using the `[1, "shadow_id"]` format (or `[3, "block_id", "shadow_id"]` if there's an overlapping block).
+
+**Correct Example:**
+```javascript
+const blocks = {
+  'move_block': {
+    opcode: 'motion_movesteps',
+    inputs: { 'STEPS': [1, 'steps_shadow'] },
+    parent: 'start_block',
+    // ...
+  },
+  'steps_shadow': {
+    opcode: 'math_number',
+    fields: { 'NUM': ['10', null] },
+    parent: 'move_block',
+    shadow: true
+  }
+};
+```
