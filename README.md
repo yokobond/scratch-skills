@@ -1,6 +1,7 @@
 # scratch-skills
 
-A Claude Code plugin that automates Scratch programming via Playwright.
+A plugin/extension that automates Scratch programming via Playwright.
+Supports both **Claude Code** and **Gemini**.
 
 ## Plugins
 
@@ -33,11 +34,18 @@ Spawns an autonomous sub-agent that implements a test Scratch program using only
 
 ## Requirements
 
+### For Claude Code
 - [Playwright plugin](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/playwright) installed in Claude Code
+
+### For Gemini
+- **Playwright MCP Server**: Ensure you have the Playwright MCP server configured in your `gemini-cli` or generic MCP settings.
+- **Chromium**: The Playwright browser must be installed.
 
 ## Installation
 
-### From marketplace
+### For Claude Code
+
+#### From marketplace
 
 First, add the marketplace:
 
@@ -55,15 +63,44 @@ Then install the desired plugin:
 /install-plugin scratch-coding
 ```
 
-### From URL
+#### From URL
 
 ```
 /install-plugin https://github.com/yokobond/scratch-skills.git
 ```
 
+### For Gemini
+
+You can install one or both extensions depending on your needs.
+
+#### 1. Install via Gemini CLI
+
+**Scratch Operation (Core)**
+```bash
+gemini extensions link plugins/scratch-operation
+```
+
+**Scratch Coding (Patterns)**
+```bash
+gemini extensions link plugins/scratch-coding
+```
+
+#### 2. Manual Check-out
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/yokobond/scratch-skills.git
+   ```
+
+2. Add as a context/skill in your Gemini session:
+   ```bash
+   gemini add-context ./scratch-skills/plugins/scratch-operation
+   gemini add-context ./scratch-skills/plugins/scratch-coding
+   ```
+
 ## Usage
 
-Ask Claude to create a Scratch program:
+Ask Claude or Gemini to create a Scratch program:
 
 ```
 Scratchで猫が四角形を描くプログラムを作って
@@ -72,6 +109,9 @@ Scratchで猫が四角形を描くプログラムを作って
 ```
 Make a Scratch project where the cat bounces around the screen
 ```
+
+> "Create a Scratch program where the cat walks in a square." (Uses `scratch-operation`)
+> "How do I make two sprites talk to each other?" (Uses `scratch-coding`)
 
 The plugin handles all the low-level interaction — finding the VM instance, block manipulation, and project management — so you can focus on describing what you want.
 
