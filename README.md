@@ -11,6 +11,7 @@ Agent skills for automating the Scratch editor via Playwright. Compatible with a
 - **scratch-sprite-library** — Add sprites and backdrops from the Scratch built-in library.
 - **scratch-custom-costume** — Add custom SVG or PNG costumes to sprites programmatically.
 - **scratch-project-file** — Download and upload Scratch project `.sb3` files.
+- **scratch-project-reader** — Read and summarize all sprites, scripts, and variables in the currently loaded project. Works with both new and existing public projects.
 
 ### Coding Patterns
 
