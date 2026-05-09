@@ -6,17 +6,17 @@ Agent skills for automating the Scratch editor via Playwright. Compatible with a
 
 ### Editor Operations
 
-- **scratch-vm-injection** — Injects blocks directly into the Scratch VM by serializing/deserializing the project JSON. Best for programmatically creating complete Scratch programs quickly.
-- **scratch-block-dragging** — Builds Scratch programs by dragging and dropping blocks from the palette to the script area using mouse operations. Mimics real user interaction with the Scratch editor UI.
-- **scratch-sprite-library** — Add sprites and backdrops from the Scratch built-in library.
-- **scratch-custom-costume** — Add custom SVG or PNG costumes to sprites programmatically.
-- **scratch-project-file** — Download and upload Scratch project `.sb3` files.
-- **scratch-project-reader** — Read and summarize all sprites, scripts, and variables in the currently loaded project. Works with both new and existing public projects.
+- **scratch-operation-code-injection** — Injects blocks directly into the Scratch VM by serializing/deserializing the project JSON. Best for programmatically creating complete Scratch programs quickly.
+- **scratch-operation-block-dragging** — Builds Scratch programs by dragging and dropping blocks from the palette to the script area using mouse operations. Mimics real user interaction with the Scratch editor UI.
+- **scratch-operation-project-file** — Download and upload Scratch project `.sb3` files.
+- **scratch-operation-project-reader** — Read and summarize all sprites, scripts, and variables in the currently loaded project. Works with both new and existing public projects.
 
 ### Coding Patterns
 
-- **scratch-multi-sprite-drawing** — Coordinate multiple sprites drawing simultaneously.
-- **scratch-storytelling-messaging** — Patterns for sequential dialog and messages.
+- **scratch-coding-sprite-library** — Add sprites and backdrops from the Scratch built-in library.
+- **scratch-coding-custom-costume** — Add custom SVG or PNG costumes to sprites programmatically.
+- **scratch-coding-storytelling-messaging** — Patterns for sequential dialog and messages.
+- **scratch-coding-multi-sprite-drawing** — Coordinate multiple sprites drawing simultaneously.
 
 ## Requirements
 
@@ -34,7 +34,7 @@ gh skill install yokobond/scratch-skills
 Install a single skill:
 
 ```bash
-gh skill install yokobond/scratch-skills scratch-vm-injection
+gh skill install yokobond/scratch-skills scratch-operation-code-injection
 ```
 
 ### APM

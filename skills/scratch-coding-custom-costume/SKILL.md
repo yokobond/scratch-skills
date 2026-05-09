@@ -1,5 +1,5 @@
 ---
-name: scratch-custom-costume
+name: scratch-coding-custom-costume
 description: Add custom SVG or PNG costumes to sprites programmatically via the Scratch VM storage API. Enables creating original characters, shapes, or artwork without using the paint editor UI.
 license: MIT
 ---
@@ -26,7 +26,7 @@ Use the Scratch VM's **storage API** to create an image asset (SVG or PNG), wrap
 
 ## Prerequisites
 
-This skill builds on the **scratch-vm-injection** skill. Ensure:
+This skill builds on the **scratch-operation-code-injection** skill. Ensure:
 - The Playwright MCP server is configured
 - The Scratch editor is open and `window.vm` is available
 
@@ -376,7 +376,7 @@ The fix: **add new costumes first, then delete old ones** (see Correct Pattern a
 
 ### The Problem
 
-`vm.loadProject()` (used by the **scratch-vm-injection** skill's `updateSprite` helper) **destroys all locally-injected costumes**. When the project is reloaded, Scratch tries to fetch every asset by its md5 hash from the remote CDN (`api.scratch.mit.edu`). Locally created assets have never been uploaded there, so the fetch fails and the costume appears as a "?" placeholder.
+`vm.loadProject()` (used by the **scratch-operation-code-injection** skill's `updateSprite` helper) **destroys all locally-injected costumes**. When the project is reloaded, Scratch tries to fetch every asset by its md5 hash from the remote CDN (`api.scratch.mit.edu`). Locally created assets have never been uploaded there, so the fetch fails and the costume appears as a "?" placeholder.
 
 This affects both SVG and PNG costumes equally.
 
@@ -596,5 +596,5 @@ storage.createAsset(
 
 ## When NOT to Use This Pattern
 
-- **Library sprites**: If a suitable costume exists in the Scratch sprite library, use the **scratch-sprite-library** skill to add it from the UI instead
+- **Library sprites**: If a suitable costume exists in the Scratch sprite library, use the **scratch-coding-sprite-library** skill to add it from the UI instead
 - **Interactive drawing**: If the user needs to draw or edit the costume themselves through the paint editor

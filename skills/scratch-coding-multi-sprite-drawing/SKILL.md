@@ -1,5 +1,5 @@
 ---
-name: scratch-multi-sprite-drawing
+name: scratch-coding-multi-sprite-drawing
 description: Pattern for coordinating pen drawing across multiple sprites. Uses a stage-based broadcast to ensure "pen clear" runs once before all sprites begin drawing, preventing partial erasure.
 license: MIT
 ---
@@ -38,7 +38,7 @@ Sprite2: [when I receive "draw"] -> [pen down] -> [repeat 4 ...]
 
 ## Prerequisites
 
-This skill builds on the **scratch-vm-injection** skill. Ensure:
+This skill builds on the **scratch-operation-code-injection** skill. Ensure:
 - The Playwright MCP server is configured
 - The Scratch editor is open and `window.vm` and `window.updateSprite` are available
 

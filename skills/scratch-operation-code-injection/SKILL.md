@@ -1,5 +1,5 @@
 ---
-name: scratch-vm-injection
+name: scratch-operation-code-injection
 description: Automates Scratch programming by injecting blocks directly into the web editor's VM. Use this skill when you need to create or run Scratch programs programmatically.
 license: MIT
 ---
@@ -159,7 +159,7 @@ Once `window.vm` is set and `window.updateSprite` is defined, you can inject blo
 3. Modify the `blocks` object of the target sprite in the JSON.
 4. Reload the project (`vm.loadProject()`).
 
-This ensures **built-in and CDN-hosted** assets (costumes/sounds) are preserved while code is updated. However, **costumes injected via the storage API** (using the **scratch-custom-costume** skill) are lost — see Tip #6 below.
+This ensures **built-in and CDN-hosted** assets (costumes/sounds) are preserved while code is updated. However, **costumes injected via the storage API** (using the **scratch-coding-custom-costume** skill) are lost — see Tip #6 below.
 
 Use `browser_evaluate` to call `updateSprite` and then run the project:
 
@@ -264,7 +264,7 @@ When defining `inputs`, Scratch uses specific arrays for literal values:
 
 ### 5. Custom Costumes and loadProject()
 
-If the project uses costumes injected via `storage.createAsset()` (the **scratch-custom-costume** skill), calling `loadProject()` — including via `updateSprite` — will **destroy those costumes**. Scratch tries to fetch every asset by md5 hash from the remote CDN, which fails for local-only assets, leaving "?" placeholders.
+If the project uses costumes injected via `storage.createAsset()` (the **scratch-coding-custom-costume** skill), calling `loadProject()` — including via `updateSprite` — will **destroy those costumes**. Scratch tries to fetch every asset by md5 hash from the remote CDN, which fails for local-only assets, leaving "?" placeholders.
 
 **Fix**: Re-inject the costumes **inside the same `page.evaluate` call** immediately after `loadProject()` completes. Splitting into two separate `page.evaluate` calls risks a render gap where the broken "?" costume briefly appears. Also, always **add the new costume first, then delete old ones** — `deleteCostume` silently fails when only one costume remains.
 
@@ -310,7 +310,7 @@ async (page) => {
 }
 ```
 
-For PNG costumes, convert bytes to base64 before passing to `page.evaluate` (since `Uint8Array` is not JSON-serializable), then decode with `atob()` inside. See the **scratch-custom-costume** skill for the full PNG re-injection pattern.
+For PNG costumes, convert bytes to base64 before passing to `page.evaluate` (since `Uint8Array` is not JSON-serializable), then decode with `atob()` inside. See the **scratch-coding-custom-costume** skill for the full PNG re-injection pattern.
 
 ### 6. Passing Arguments and Escaping Characters
 When using `page.evaluate(fn, arg)` within `browser_run_code`, keep these in mind to avoid common errors:

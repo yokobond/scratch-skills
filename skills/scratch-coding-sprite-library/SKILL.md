@@ -1,5 +1,5 @@
 ---
-name: scratch-sprite-library
+name: scratch-coding-sprite-library
 description: Adds sprites and backdrops from the Scratch built-in library via the editor UI. Use this skill when you need to add pre-made characters, animals, objects, or backgrounds to a Scratch project.
 license: MIT
 ---
@@ -223,7 +223,7 @@ To remove the default cat sprite (Sprite1) before adding your own:
 }
 ```
 
-**Note:** This requires the VM to be connected first (see the `scratch-vm-injection` skill for the VM finder code).
+**Note:** This requires the VM to be connected first (see the `scratch-operation-code-injection` skill for the VM finder code).
 
 ## Available Sprites Reference
 

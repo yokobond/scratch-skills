@@ -1,5 +1,5 @@
 ---
-name: scratch-storytelling-messaging
+name: scratch-coding-storytelling-messaging
 description: Pattern for storytelling with sequential dialog (message chaining) and simultaneous speech (parallel broadcast). Combines backdrop switching with broadcast messages to create multi-scene conversations between characters.
 license: MIT
 ---
@@ -67,7 +67,7 @@ Sprite B receives "scene2": say line  }  (simultaneous)
 
 ## Prerequisites
 
-This skill builds on the **scratch-vm-injection** skill. Ensure:
+This skill builds on the **scratch-operation-code-injection** skill. Ensure:
 - The Playwright MCP server is configured
 - The Scratch editor is open and `window.vm` is available
 
