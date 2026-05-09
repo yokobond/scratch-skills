@@ -1,6 +1,7 @@
 ---
 name: scratch-multi-sprite-drawing
 description: Pattern for coordinating pen drawing across multiple sprites. Uses a stage-based broadcast to ensure "pen clear" runs once before all sprites begin drawing, preventing partial erasure.
+license: MIT
 ---
 
 # Scratch Multi-Sprite Drawing Coordination

@@ -1,6 +1,7 @@
 ---
 name: scratch-vm-injection
 description: Automates Scratch programming by injecting blocks directly into the web editor's VM. Use this skill when you need to create or run Scratch programs programmatically.
+license: MIT
 ---
 
 # Scratch VM Injection Skill

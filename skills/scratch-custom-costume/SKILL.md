@@ -1,6 +1,7 @@
 ---
 name: scratch-custom-costume
 description: Add custom SVG or PNG costumes to sprites programmatically via the Scratch VM storage API. Enables creating original characters, shapes, or artwork without using the paint editor UI.
+license: MIT
 ---
 
 # Scratch Custom Costume Injection

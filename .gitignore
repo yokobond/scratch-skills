@@ -1,2 +1,7 @@
 # Temporary test artifacts — created by scratch-skill-tester
 tmp/
+
+# Installed agent skills (apm install, gh skill install)
+.claude/skills/
+.github/skills/
+.cursor/skills/

@@ -1,0 +1,4 @@
+name: scratch-skills
+version: 1.0.0
+description: Agent skills for automating the Scratch editor via Playwright
+license: MIT

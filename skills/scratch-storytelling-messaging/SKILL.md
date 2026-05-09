@@ -1,6 +1,7 @@
 ---
 name: scratch-storytelling-messaging
 description: Pattern for storytelling with sequential dialog (message chaining) and simultaneous speech (parallel broadcast). Combines backdrop switching with broadcast messages to create multi-scene conversations between characters.
+license: MIT
 ---
 
 # Scratch Storytelling with Message Chaining

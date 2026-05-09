@@ -1,6 +1,7 @@
 ---
 name: scratch-project-file
 description: Downloads (saves) and uploads (loads) Scratch project .sb3 files. Use this skill when you need to save a Scratch project to a local file or load a previously saved .sb3 file into the editor.
+license: MIT
 ---
 
 # Scratch Project File Skill
