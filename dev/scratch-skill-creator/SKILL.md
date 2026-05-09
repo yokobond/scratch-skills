@@ -1,6 +1,6 @@
 ---
 name: scratch-skill-creator
-description: Build a Scratch program from a user prompt using vibe coding, then distill the novel techniques into a new reusable SKILL.md. Use this skill when you want to grow the scratch-operation or scratch-coding plugin with a new pattern discovered during live coding.
+description: Build a Scratch program from a user prompt using vibe coding, then distill the novel techniques into a new reusable SKILL.md. Use this skill when you want to grow the skills collection with a new pattern discovered during live coding.
 ---
 
 # Scratch Skill Creator
@@ -58,7 +58,7 @@ Once the program is working correctly, **save the project as an `.sb3` file** us
 Save path convention:
 
 ```
-plugins/<target-plugin>/skills/<skill-name>/example.sb3
+skills/<skill-name>/example.sb3
 ```
 
 Use the download pattern from `scratch-project-file`:
@@ -79,7 +79,7 @@ async (page) => {
     URL.revokeObjectURL(url);
   });
   const download = await downloadPromise;
-  await download.saveAs('/absolute/path/to/plugins/<target-plugin>/skills/<skill-name>/example.sb3');
+  await download.saveAs('/absolute/path/to/skills/<skill-name>/example.sb3');
   return 'Project saved';
 }
 ```
@@ -92,17 +92,14 @@ async (page) => {
 
 Once the program works, extract the reusable knowledge into a new skill file.
 
-### 2.1 Choose a Skill Name and Target Plugin
-
-- **`scratch-operation`** — for new editor operations (new Playwright interactions, new VM API usage, new asset handling)
-- **`scratch-coding`** — for new Scratch coding patterns (new block combinations, new architecture patterns, new game/animation techniques)
+### 2.1 Choose a Skill Name
 
 Skill name format: `scratch-<noun>` (e.g., `scratch-clone-animation`, `scratch-variable-hud`, `scratch-audio-reactive`).
 
 ### 2.2 Create the Skill Directory
 
 ```
-plugins/<target-plugin>/skills/<skill-name>/SKILL.md
+skills/<skill-name>/SKILL.md
 ```
 
 ### 2.3 Write the SKILL.md
@@ -162,15 +159,9 @@ description: <one sentence — what pattern this is and when to use it>
 - [ ] "When to Use / When NOT to Use" sections are honest and specific
 - [ ] No copy-paste from existing skills — only genuinely new information
 
-### 2.4 Update the Plugin Index
+### 2.4 Validate the Skill
 
-**Add to the plugin's top-level `SKILL.md`** (the index file, e.g. `plugins/scratch-coding/SKILL.md`):
-
-```markdown
-- [New Skill Name](./skills/<skill-name>/SKILL.md): <same one-sentence description>
-```
-
-This is the only index update required. The plugin's `gemini-extension.json` and `.claude-plugin/plugin.json` reference the top-level `SKILL.md` as the context entry point — no `skills` array needs to be maintained in those files.
+Run `gh skill publish --dry-run` from the repository root to confirm the new skill passes the agentskills.io spec before handing off to the tester.
 
 ---
 
@@ -178,7 +169,7 @@ This is the only index update required. The plugin's `gemini-extension.json` and
 
 After saving the new SKILL.md, invoke the **scratch-skill-tester** skill:
 
-> "Now test the new skill `<skill-name>` in plugin `<target-plugin>`."
+> "Now test the new skill `<skill-name>`."
 
 The tester will spawn an autonomous agent and report results. If the agent finds gaps or bugs in the SKILL.md, return to Phase 2 and fix them, then re-test.
 
@@ -199,7 +190,7 @@ Phase 1:
 
 Phase 2:
   - Skill name: scratch-clone-pen-trail
-  - Target plugin: scratch-coding
+  - Skill directory: skills/scratch-clone-pen-trail/
   - Document: clone initialization order, pen-color-per-clone pattern, edge bounce with pen
 
 Phase 3:

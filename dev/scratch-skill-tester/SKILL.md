@@ -16,7 +16,7 @@ Run this skill immediately after `scratch-skill-creator` produces a new SKILL.md
 Before invoking, confirm you have:
 
 1. **Skill path** — relative path to the new skill file, e.g.:
-   `plugins/scratch-coding/skills/scratch-clone-pen-trail/SKILL.md`
+   `skills/scratch-clone-pen-trail/SKILL.md`
 2. **Test program description** — a short, different program that exercises the skill's core pattern. It must be:
    - **Different** from the program built during skill creation (avoids the agent copying from memory)
    - **Focused** — it should specifically require the pattern the skill teaches
@@ -92,8 +92,8 @@ The `./tmp` folder is used **exclusively for temporary test artifacts produced b
 | Sub-agent test project (`.sb3`) | `./tmp/<skill-name>/test.sb3` |
 | Sub-agent build screenshot | `./tmp/<skill-name>/screenshot-build.png` |
 | Sub-agent reload screenshot | `./tmp/<skill-name>/screenshot-reload.png` |
-| New skill file | `plugins/<target-plugin>/skills/<skill-name>/SKILL.md` |
-| Creator example project | `plugins/<target-plugin>/skills/<skill-name>/example.sb3` |
+| New skill file | `skills/<skill-name>/SKILL.md` |
+| Creator example project | `skills/<skill-name>/example.sb3` |
 
 Before saving, create the tmp directory:
 
@@ -103,7 +103,7 @@ mkdir -p ./tmp/<skill-name>
 
 If multiple test rounds are needed, use numbered filenames: `./tmp/<skill-name>/test-1.sb3`, `./tmp/<skill-name>/test-2.sb3`, etc.
 
-> **Note**: `./tmp` is gitignored and must never be committed. Skill files under `plugins/` are what get committed.
+> **Note**: `./tmp` is gitignored and must never be committed. Skill files under `skills/` are what get committed.
 
 ---
 
@@ -115,8 +115,8 @@ The agent successfully built and ran the program. The SKILL.md is ready.
 
 Next steps:
 - Confirm the test `.sb3` was saved to `./tmp/<skill-name>/test.sb3`.
-- Confirm the new skill file exists at `plugins/<target-plugin>/skills/<skill-name>/SKILL.md`.
-- Commit the files under `plugins/` (SKILL.md, example.sb3, marketplace.json update). Do **not** commit anything under `./tmp`.
+- Confirm the new skill file exists at `skills/<skill-name>/SKILL.md`.
+- Commit the files under `skills/` (SKILL.md, example.sb3). Do **not** commit anything under `./tmp`.
 - Optionally run one more test with a third, more complex program to increase confidence.
 
 ### PARTIAL
