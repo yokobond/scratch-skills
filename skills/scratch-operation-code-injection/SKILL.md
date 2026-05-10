@@ -6,41 +6,31 @@ license: MIT
 
 # Scratch VM Injection Skill
 
-This skill programs Scratch (scratch.mit.edu) by directly interacting with the Scratch Virtual Machine (VM) running in the browser via the Playwright MCP tools.
+This skill programs Scratch (scratch.mit.edu) by directly interacting with the Scratch Virtual Machine (VM) running in the browser via the `playwright-cli` skill.
 
 ## Prerequisites
 
-This skill requires the **Playwright MCP server** to be installed and configured. Ensure the following is added to your MCP settings (e.g. `~/.claude/claude_desktop_config.json` or project `.mcp.json`):
+This skill drives the browser via the `playwright-cli` skill. Ensure that skill is installed and a browser session has been opened (e.g. `playwright-cli open --headed https://scratch.mit.edu/projects/editor/`).
 
-```json
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": ["@anthropic-ai/mcp-playwright@latest"]
-    }
-  }
-}
-```
-
-If the browser is not installed, run `browser_install` first to download the required Chromium binary.
+> **Visibility**: Always use `--headed` when opening the browser so that the Scratch editor is visible to the user during project creation.
 
 ## Workflow
 
 ### 1. Open Scratch Editor
 
-Navigate to the editor using `browser_navigate`:
-```
-browser_navigate url="https://scratch.mit.edu/projects/editor/"
+Open the editor in a visible Chrome browser:
+
+```bash
+playwright-cli open --headed https://scratch.mit.edu/projects/editor/
 ```
 
 ### 2. Connect to VM
 
-The most critical step is finding the Scratch VM instance hidden within the React components. Use `browser_evaluate` to find it and expose it as `window.vm`.
+The most critical step is finding the Scratch VM instance hidden within the React components. Run the finder via `playwright-cli run-code` and expose it as `window.vm`:
 
-```javascript
-// browser_evaluate function:
-() => {
+```bash
+playwright-cli run-code "$(cat <<'EOF'
+async page => await page.evaluate(() => {
   const findVM = () => {
     if (window.vm) return window.vm;
     const root = document.body;
@@ -76,18 +66,24 @@ The most critical step is finding the Scratch VM instance hidden within the Reac
   if (!vm) throw new Error('Scratch VM not found');
   window.vm = vm;
   return 'VM found and exposed as window.vm';
-}
+})
+EOF
+)"
 ```
 
-If the VM is not found, the editor may not be fully loaded. Wait a few seconds with `browser_wait_for time=3` and retry.
+If the VM is not found, the editor may not be fully loaded. Wait a few seconds and retry:
+
+```bash
+playwright-cli run-code "async page => await page.waitForTimeout(3000)"
+```
 
 ### 3. Define the Update Helper
 
 After connecting to the VM, define the reusable `window.updateSprite(name, blocks)` helper. This function handles JSON serialization, block injection, and project reloading.
 
-```javascript
-// browser_evaluate function:
-() => {
+```bash
+playwright-cli run-code "$(cat <<'EOF'
+async page => await page.evaluate(() => {
   const ensureVM = () => {
     if (window.vm) return window.vm;
     const root = document.body;
@@ -144,7 +140,9 @@ After connecting to the VM, define the reusable `window.updateSprite(name, block
   };
 
   return 'window.updateSprite is now defined';
-}
+})
+EOF
+)"
 ```
 
 ### 4. Program Sprites
@@ -161,11 +159,11 @@ Once `window.vm` is set and `window.updateSprite` is defined, you can inject blo
 
 This ensures **built-in and CDN-hosted** assets (costumes/sounds) are preserved while code is updated. However, **costumes injected via the storage API** (using the **scratch-coding-custom-costume** skill) are lost — see Tip #6 below.
 
-Use `browser_evaluate` to call `updateSprite` and then run the project:
+Use `playwright-cli run-code` to call `updateSprite` and then run the project:
 
-```javascript
-// browser_evaluate function:
-async () => {
+```bash
+playwright-cli run-code "$(cat <<'EOF'
+async page => await page.evaluate(async () => {
   await window.updateSprite('Sprite1', {
     'START': {
       opcode: 'event_whenflagclicked',
@@ -179,13 +177,15 @@ async () => {
   });
   window.vm.greenFlag();
   return 'Program started';
-}
+})
+EOF
+)"
 ```
 
-For complex block definitions, use `browser_run_code` which supports multi-line Playwright code:
+For complex block definitions, use the same `playwright-cli run-code` heredoc form — the body is multi-line Playwright code:
 
-```javascript
-// browser_run_code code:
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   await page.evaluate(async () => {
     const blocks = {
@@ -214,6 +214,8 @@ async (page) => {
     window.vm.greenFlag();
   });
 }
+EOF
+)"
 ```
 
 ### 5. Managing Sprites
@@ -222,16 +224,19 @@ async (page) => {
 - **Duplicate**: `await vm.duplicateSprite(target.id)` (Async!)
 - **Delete**: `vm.deleteSprite(target.id)`
 
-These can be called via `browser_evaluate`, e.g.:
-```javascript
-// browser_evaluate function:
-() => {
+These can be called via `playwright-cli run-code`, e.g.:
+
+```bash
+playwright-cli run-code "$(cat <<'EOF'
+async page => await page.evaluate(() => {
   const target = window.vm.runtime.targets.find(
     t => t.sprite.name === 'Sprite1'
   );
   window.vm.renameSprite(target.id, 'Player');
   return 'Renamed';
-}
+})
+EOF
+)"
 ```
 
 ## Block JSON Structure
@@ -247,13 +252,17 @@ These can be called via `browser_evaluate`, e.g.:
 ## Tips & Best Practices
 
 ### 1. Executing Complex Scripts
-For large block definitions that are hard to fit in a single `browser_evaluate` call, use `browser_run_code` which accepts multi-line Playwright code. The code parameter takes an `async (page) => { ... }` function.
+For large block definitions, `playwright-cli run-code` accepts an `async page => { ... }` function. Use the bash heredoc form (`"$(cat <<'EOF' ... EOF)"`) so multi-line JS is preserved verbatim and shell metacharacters (`$`, backticks) inside the JS are not expanded.
 
 ### 2. Wait for VM
-The VM might not be available immediately after `browser_navigate`. If the VM finder fails, use `browser_wait_for time=3` and retry.
+The VM might not be available immediately after `playwright-cli goto`. If the VM finder fails, wait a few seconds and retry:
+
+```bash
+playwright-cli run-code "async page => await page.waitForTimeout(3000)"
+```
 
 ### 3. Checking Page State
-Use `browser_snapshot` to inspect the current page state and verify the editor has loaded correctly before attempting to connect to the VM.
+Use `playwright-cli snapshot` to inspect the current page state and verify the editor has loaded correctly before attempting to connect to the VM.
 
 ### 4. Input Types Reference
 When defining `inputs`, Scratch uses specific arrays for literal values:
@@ -268,8 +277,8 @@ If the project uses costumes injected via `storage.createAsset()` (the **scratch
 
 **Fix**: Re-inject the costumes **inside the same `page.evaluate` call** immediately after `loadProject()` completes. Splitting into two separate `page.evaluate` calls risks a render gap where the broken "?" costume briefly appears. Also, always **add the new costume first, then delete old ones** — `deleteCostume` silently fails when only one costume remains.
 
-```javascript
-// browser_run_code code:
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   const svgData = `<svg ...>...</svg>`;  // keep costume data in Node.js scope
 
@@ -308,12 +317,14 @@ async (page) => {
     target.setCostume(0);
   }, svgData);
 }
+EOF
+)"
 ```
 
 For PNG costumes, convert bytes to base64 before passing to `page.evaluate` (since `Uint8Array` is not JSON-serializable), then decode with `atob()` inside. See the **scratch-coding-custom-costume** skill for the full PNG re-injection pattern.
 
 ### 6. Passing Arguments and Escaping Characters
-When using `page.evaluate(fn, arg)` within `browser_run_code`, keep these in mind to avoid common errors:
+When using `page.evaluate(fn, arg)` within `playwright-cli run-code`, keep these in mind to avoid common errors:
 - **Single Argument Limit**: `page.evaluate` only accepts **one** argument after the function. If you need to pass multiple values (like blocks for different sprites), wrap them in a single object:
   ```javascript
   await page.evaluate(async ({rBlocks, tBlocks}) => {
@@ -321,8 +332,9 @@ When using `page.evaluate(fn, arg)` within `browser_run_code`, keep these in min
     await window.updateSprite('Turtle', tBlocks);
   }, {rBlocks: rabbitBlocks, tBlocks: turtleBlocks});
   ```
-- **Avoid Syntax Errors in Strings**: Be extremely careful with special characters like backslashes (`\`) or literal newlines inside strings when using `browser_run_code`. Unescaped `\n` or `\t` can break the code being sent to the browser, leading to `SyntaxError: Invalid or unexpected token`.
+- **Avoid Syntax Errors in Strings**: Inside the heredoc, special characters like backslashes (`\`) or literal newlines inside strings still need to be valid JavaScript. Unescaped `\n` or `\t` can break the code, leading to `SyntaxError: Invalid or unexpected token`.
 - **Serialization**: All data passed to `page.evaluate` must be JSON-serializable. Functions or complex class instances cannot be passed this way.
+- **Quoted heredoc terminator**: Always write `<<'EOF'` (single-quoted) — the quotes prevent the shell from expanding `$`, backticks, and `\` inside the JS body.
 
 ### 7. Syncing Editor UI
 

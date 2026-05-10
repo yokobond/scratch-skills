@@ -10,8 +10,7 @@ This skill reads the project JSON from the Scratch VM and extracts a human-reada
 
 ## Prerequisites
 
-- The **Playwright MCP server** must be available.
-- The Scratch editor must be open in the browser (see `scratch-operation-code-injection` skill).
+This skill drives the browser via the `playwright-cli` skill. Ensure that skill is installed and the Scratch editor is open in the browser session (see `scratch-operation-code-injection` skill for opening it).
 
 ---
 
@@ -21,9 +20,9 @@ This skill reads the project JSON from the Scratch VM and extracts a human-reada
 
 If `window.vm` is not yet set, find and expose it:
 
-```javascript
-// browser_evaluate function:
-() => {
+```bash
+playwright-cli run-code "$(cat <<'EOF'
+async page => await page.evaluate(() => {
   if (window.vm) return 'VM already connected';
   const root = document.body;
   const queue = [root];
@@ -54,10 +53,16 @@ If `window.vm` is not yet set, find and expose it:
     }
   }
   return 'ERROR: VM not found — editor may not be loaded yet';
-}
+})
+EOF
+)"
 ```
 
-If the VM is not found, wait a few seconds (`browser_wait_for time=3`) and retry.
+If the VM is not found, wait a few seconds and retry:
+
+```bash
+playwright-cli run-code "async page => await page.waitForTimeout(3000)"
+```
 
 ---
 
@@ -65,9 +70,9 @@ If the VM is not found, wait a few seconds (`browser_wait_for time=3`) and retry
 
 Run the following code to extract sprites and scripts. It returns a structured text summary.
 
-```javascript
-// browser_evaluate function:
-() => {
+```bash
+playwright-cli run-code "$(cat <<'EOF'
+async page => await page.evaluate(() => {
   if (!window.vm) return 'ERROR: window.vm is not set. Run Step 1 first.';
 
   const project = JSON.parse(window.vm.toJSON());
@@ -142,7 +147,9 @@ Run the following code to extract sprites and scripts. It returns a structured t
   }
 
   return output.join('\n');
-}
+})
+EOF
+)"
 ```
 
 The return value is a plain-text summary like:
@@ -183,9 +190,9 @@ Use the [Scratch block opcode reference](https://en.scratch-wiki.info/wiki/Scrat
 
 If you need the complete unabridged project data for a specific sprite, use:
 
-```javascript
-// browser_evaluate function:
-(spriteName) => {
+```bash
+playwright-cli run-code "$(cat <<'EOF'
+async page => await page.evaluate((spriteName) => {
   if (!window.vm) return 'ERROR: window.vm not set';
   const project = JSON.parse(window.vm.toJSON());
   const target = spriteName
@@ -193,18 +200,20 @@ If you need the complete unabridged project data for a specific sprite, use:
     : project.targets.find(t => !t.isStage);
   if (!target) return 'Sprite not found: ' + spriteName;
   return JSON.stringify(target.blocks, null, 2);
-}
+}, 'Sprite1')
+EOF
+)"
 ```
 
-Pass the sprite name as the argument. This is useful when you need exact block IDs, input structures, or field values to modify later.
+Pass the sprite name as the second argument to `page.evaluate`. This is useful when you need exact block IDs, input structures, or field values to modify later.
 
 ---
 
 ### Step 5 — List Variables and Lists
 
-```javascript
-// browser_evaluate function:
-() => {
+```bash
+playwright-cli run-code "$(cat <<'EOF'
+async page => await page.evaluate(() => {
   if (!window.vm) return 'ERROR: window.vm not set';
   const project = JSON.parse(window.vm.toJSON());
   const output = [];
@@ -219,7 +228,9 @@ Pass the sprite name as the argument. This is useful when you need exact block I
     }
   }
   return output.length ? output.join('\n') : '(no variables or lists found)';
-}
+})
+EOF
+)"
 ```
 
 ---

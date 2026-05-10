@@ -20,20 +20,20 @@ Read the user's description carefully. Identify:
 
 Use the `scratch-operation-code-injection` skill to open the editor and connect to the VM:
 
-```
-browser_navigate url="https://scratch.mit.edu/projects/editor/"
+```bash
+playwright-cli open --headed https://scratch.mit.edu/projects/editor/
 ```
 
-Wait for the editor to load (`browser_wait_for time=3`), then expose `window.vm` and define `window.updateSprite`.
+Wait for the editor to load (`playwright-cli run-code "async page => await page.waitForTimeout(3000)"`), then expose `window.vm` and define `window.updateSprite`.
 
 ### 1.3 Implement Iteratively
 
 Build the program in short cycles:
 
 1. **Plan** the block structure for one sprite or scene at a time.
-2. **Inject** blocks via `window.updateSprite` or `browser_run_code`.
+2. **Inject** blocks via `window.updateSprite` or `playwright-cli run-code`.
 3. **Run** with `window.vm.greenFlag()`.
-4. **Observe** the result using `browser_take_screenshot` or `browser_snapshot`.
+4. **Observe** the result using `playwright-cli screenshot` or `playwright-cli snapshot`.
 5. **Adjust** until the behavior matches the intent.
 
 > **Vibe coding rule**: Don't plan the entire program upfront. Code one piece, see how it feels, then continue. Follow the energy of what's working.
@@ -63,8 +63,8 @@ skills/<skill-name>/example.sb3
 
 Use the download pattern from `scratch-operation-project-file`:
 
-```javascript
-// browser_run_code code:
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   const downloadPromise = page.waitForEvent('download', { timeout: 10000 });
   await page.evaluate(async () => {
@@ -82,6 +82,8 @@ async (page) => {
   await download.saveAs('/absolute/path/to/skills/<skill-name>/example.sb3');
   return 'Project saved';
 }
+EOF
+)"
 ```
 
 > **Why save here?** The `.sb3` file serves as ground truth for the skill. If the SKILL.md documentation is ever unclear, the tester or a future developer can load this file to see the exact working implementation.

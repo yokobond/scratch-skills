@@ -6,7 +6,7 @@ license: MIT
 
 # Scratch Block Dragging Skill
 
-This skill programs Scratch (scratch.mit.edu) by visually dragging blocks from the block palette to the script area using Playwright MCP mouse operations. Unlike the VM injection approach, this method mimics real user interaction with the Scratch editor UI.
+This skill programs Scratch (scratch.mit.edu) by visually dragging blocks from the block palette to the script area using Playwright mouse operations exposed through the `playwright-cli` skill. Unlike the VM injection approach, this method mimics real user interaction with the Scratch editor UI.
 
 ## Block Geometry & Connection Points
 
@@ -39,20 +39,9 @@ Given a block's bounding box `(left, top, width, height)` and `scale = workspace
 
 ## Prerequisites
 
-This skill requires the **Playwright MCP server** to be installed and configured. Ensure the following is added to your MCP settings (e.g. `~/.claude/claude_desktop_config.json` or project `.mcp.json`):
+This skill drives the browser via the `playwright-cli` skill. Ensure that skill is installed and a browser session has been opened (e.g. `playwright-cli open --headed https://scratch.mit.edu/projects/editor/`).
 
-```json
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": ["@anthropic-ai/mcp-playwright@latest"]
-    }
-  }
-}
-```
-
-If the browser is not installed, run `browser_install` first to download the required Chromium binary.
+> **Visibility**: Always use `--headed` when opening the browser so that the Scratch editor is visible to the user during project creation.
 
 ## When to Use
 
@@ -64,21 +53,22 @@ If the browser is not installed, run `browser_install` first to download the req
 
 ### 1. Open Scratch Editor
 
-```
-browser_navigate url="https://scratch.mit.edu/projects/editor/"
+```bash
+playwright-cli open --browser=chrome https://scratch.mit.edu/projects/editor/
 ```
 
 Wait for the editor to fully load. Take a screenshot to confirm the editor is ready:
 
-```
-browser_take_screenshot
+```bash
+playwright-cli screenshot
 ```
 
 ### 2. Detect Workspace Scale
 
 Before dragging blocks, detect the workspace scale factor so connection-point calculations use correct screen coordinates.
 
-```javascript
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   const scale = await page.evaluate(() => {
     // Method 1: Blockly API
@@ -105,6 +95,8 @@ async (page) => {
   });
   return `Workspace scale: ${scale}`;
 }
+EOF
+)"
 ```
 
 Store `window.workspaceScale` for use in subsequent connection-point calculations.
@@ -150,7 +142,8 @@ Always use block opcodes (e.g., `motion_movesteps`, `control_forever`) to identi
 
 Use the Blockly Toolbox API to select a category by its internal ID. This scrolls the flyout to show that category's blocks.
 
-```javascript
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   await page.evaluate(() => {
     const ws = Blockly.getMainWorkspace();
@@ -158,11 +151,14 @@ async (page) => {
   });
   return 'Selected Events category';
 }
+EOF
+)"
 ```
 
 **Fallback** — click the category DOM element directly:
 
-```javascript
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   await page.evaluate(() => {
     const cat = document.querySelector('.scratchCategoryId-events');
@@ -170,13 +166,16 @@ async (page) => {
   });
   return 'Clicked Events category';
 }
+EOF
+)"
 ```
 
 ### 5. Locate the Block Position
 
-Use `browser_run_code` with the Blockly API to find the exact bounding box of a block by its opcode:
+Use `playwright-cli run-code` with the Blockly API to find the exact bounding box of a block by its opcode:
 
-```javascript
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   const box = await page.evaluate(() => {
     const ws = Blockly.getMainWorkspace();
@@ -188,10 +187,14 @@ async (page) => {
   });
   return JSON.stringify(box);
 }
+EOF
+)"
 ```
 
 For example, to find the "point towards" block:
-```javascript
+
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   const box = await page.evaluate(() => {
     const ws = Blockly.getMainWorkspace();
@@ -202,13 +205,15 @@ async (page) => {
   });
   return JSON.stringify(box);
 }
+EOF
+)"
 ```
 
 **Important:** Use `ws.getAllBlocks()` for blocks already in the script area, and `ws.getFlyout().getWorkspace().getAllBlocks()` for blocks in the palette.
 
 ### 6. Drag a Block to the Script Area
 
-Use `browser_run_code` to perform a mouse drag operation. The drag must be done in small incremental steps for Scratch to properly register it.
+Use `playwright-cli run-code` to perform a mouse drag operation. The drag must be done in small incremental steps for Scratch to properly register it.
 
 #### Precision Connection-Point Targeting (Recommended)
 
@@ -220,7 +225,8 @@ To actually snap blocks together, calculate the drop position from the target bl
 
 **Pattern: Connect block B below block A**
 
-```javascript
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   // 1. Get source block position from flyout (palette) via Blockly API
   const src = await page.evaluate(() => {
@@ -262,11 +268,14 @@ async (page) => {
   await page.waitForTimeout(500);
   return `Dragged to (${endX}, ${endY})`;
 }
+EOF
+)"
 ```
 
 **Pattern: Insert block inside a C-block (forever/if)**
 
-```javascript
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   // 1. Get source block from flyout via Blockly API
   const src = await page.evaluate(() => {
@@ -313,13 +322,16 @@ async (page) => {
   await page.waitForTimeout(500);
   return `Dragged into C-block at (${endX}, ${endY})`;
 }
+EOF
+)"
 ```
 
 #### Approximate Visual Positioning (Fallback)
 
 Use this only for the **first hat block** (no connection target exists yet) or when precision targeting fails.
 
-```javascript
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   const startX = <block_center_x>;
   const startY = <block_center_y>;
@@ -341,6 +353,8 @@ async (page) => {
   await page.waitForTimeout(500);
   return 'Block dragged';
 }
+EOF
+)"
 ```
 
 **Critical drag parameters (both methods):**
@@ -363,20 +377,22 @@ Scratch snaps blocks when dropped within SNAP_RADIUS (48 workspace units ≈ 32p
 
 Always take a screenshot after each drag to verify the block was placed correctly:
 
-```
-browser_take_screenshot
+```bash
+playwright-cli screenshot
 ```
 
 If a wrong block was dragged, undo with:
-```
-browser_press_key key="Control+z"
+
+```bash
+playwright-cli press Control+z
 ```
 
 ### 9. Run the Program
 
 Click the green flag button to run the program:
 
-```javascript
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   await page.evaluate(() => {
     const flag = document.querySelector('img[class*="green-flag_green-flag"]');
@@ -384,6 +400,8 @@ async (page) => {
   });
   return 'Clicked green flag';
 }
+EOF
+)"
 ```
 
 ## Complete Example: Cat Follows Mouse
@@ -454,9 +472,10 @@ event_whenflagclicked
 
 **CRITICAL:** Even with precision targeting, always verify connections. Visually adjacent blocks may NOT be actually connected — Scratch's snap detection is strict. Precision targeting should handle most cases, but always confirm via the VM and use the fix below if needed.
 
-Use `browser_run_code` to check the block structure through the Scratch VM:
+Use `playwright-cli run-code` to check the block structure through the Scratch VM:
 
-```javascript
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   const result = await page.evaluate(() => {
     // Find the Scratch VM
@@ -504,6 +523,8 @@ async (page) => {
   });
   return result;
 }
+EOF
+)"
 ```
 
 **What to check:**
@@ -516,7 +537,8 @@ async (page) => {
 
 If blocks are not connected after precision-targeted dragging, fix them programmatically using the VM's loadProject pattern:
 
-```javascript
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   await page.evaluate(async () => {
     const vm = window.vm;
@@ -543,6 +565,8 @@ async (page) => {
   });
   return 'Blocks reconnected';
 }
+EOF
+)"
 ```
 
 ## Tips & Troubleshooting

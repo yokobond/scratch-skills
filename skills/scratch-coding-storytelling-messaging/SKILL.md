@@ -68,7 +68,7 @@ Sprite B receives "scene2": say line  }  (simultaneous)
 ## Prerequisites
 
 This skill builds on the **scratch-operation-code-injection** skill. Ensure:
-- The Playwright MCP server is configured
+- The `playwright-cli` skill is installed and a browser session is open
 - The Scratch editor is open and `window.vm` is available
 
 ## Implementation

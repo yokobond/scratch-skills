@@ -6,24 +6,13 @@ license: MIT
 
 # Scratch Sprite Library Skill
 
-This skill adds sprites and backdrops to a Scratch project by interacting with the built-in library dialogs in the Scratch editor via Playwright MCP tools.
+This skill adds sprites and backdrops to a Scratch project by interacting with the built-in library dialogs in the Scratch editor via the `playwright-cli` skill.
 
 ## Prerequisites
 
-This skill requires the **Playwright MCP server** to be installed and configured. Ensure the following is added to your MCP settings (e.g. `~/.claude/claude_desktop_config.json` or project `.mcp.json`):
+This skill drives the browser via the `playwright-cli` skill. Ensure that skill is installed and a browser session has been opened (e.g. `playwright-cli open --headed https://scratch.mit.edu/projects/editor/`).
 
-```json
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": ["@anthropic-ai/mcp-playwright@latest"]
-    }
-  }
-}
-```
-
-If the browser is not installed, run `browser_install` first to download the required Chromium binary.
+> **Visibility**: Always use `--headed` when opening the browser so that the Scratch editor is visible to the user during project creation.
 
 ## When to Use
 
@@ -57,18 +46,18 @@ Instead, use CSS class prefix matching. Scratch uses CSS Modules with the patter
 
 ### 1. Open Scratch Editor
 
-```
-browser_navigate url="https://scratch.mit.edu/projects/editor/"
+```bash
+playwright-cli open --headed https://scratch.mit.edu/projects/editor/
 ```
 
 Wait for the editor to fully load.
 
 ### 2. Open the Sprite Library Dialog
 
-**CRITICAL:** The sprite chooser button has overlapping sub-buttons that intercept pointer events, causing `browser_click` to time out. You **must** use JavaScript `click()` instead.
+**CRITICAL:** The sprite chooser button has overlapping sub-buttons that intercept pointer events, causing a normal `playwright-cli click` to time out. You **must** use JavaScript `click()` instead.
 
-```javascript
-// browser_run_code code:
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   await page.evaluate(() => {
     const btn = document.querySelector(
@@ -79,28 +68,32 @@ async (page) => {
   await page.waitForTimeout(2000);
   return 'Opened sprite library';
 }
+EOF
+)"
 ```
 
 ### 3. Search for a Sprite (Optional)
 
 Type into the search box to filter the library. **Sprite names are always in English** regardless of the editor locale.
 
-```javascript
-// browser_run_code code:
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   const searchBox = page.locator('input[class*="filter_filter-input"]');
   await searchBox.fill('Hare');
   await page.waitForTimeout(1000);
   return 'Searched';
 }
+EOF
+)"
 ```
 
 ### 4. Click a Sprite to Add It
 
 Find the library item by matching the name text inside `span[class*="library-item_library-item-name"]`. The dialog closes automatically after selection.
 
-```javascript
-// browser_run_code code:
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   await page.evaluate((name) => {
     const spans = document.querySelectorAll('span[class*="library-item_library-item-name"]');
@@ -115,20 +108,24 @@ async (page) => {
   await page.waitForTimeout(1000);
   return 'Sprite added';
 }
+EOF
+)"
 ```
 
 ### 5. Rename the Sprite (Optional)
 
 After adding, rename the sprite via the VM for localized or custom names:
 
-```javascript
-// browser_evaluate function:
-() => {
+```bash
+playwright-cli run-code "$(cat <<'EOF'
+async page => await page.evaluate(() => {
   const vm = window.vm;
   const target = vm.runtime.targets.find(t => t.sprite.name === 'Hare');
   if (target) vm.renameSprite(target.id, 'Rabbit');
   return 'Renamed';
-}
+})
+EOF
+)"
 ```
 
 ### 6. Repeat for Additional Sprites
@@ -141,8 +138,8 @@ The backdrop library works the same way but uses a different button.
 
 ### Open Backdrop Library
 
-```javascript
-// browser_run_code code:
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   await page.evaluate(() => {
     const btn = document.querySelector(
@@ -153,12 +150,14 @@ async (page) => {
   await page.waitForTimeout(2000);
   return 'Opened backdrop library';
 }
+EOF
+)"
 ```
 
 ### Search and Select a Backdrop
 
-```javascript
-// browser_run_code code:
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   const searchBox = page.locator('input[class*="filter_filter-input"]');
   await searchBox.fill('Blue Sky');
@@ -177,6 +176,8 @@ async (page) => {
   await page.waitForTimeout(1000);
   return 'Backdrop added';
 }
+EOF
+)"
 ```
 
 ## Filtering by Category
@@ -196,8 +197,8 @@ Category buttons are ordered consistently regardless of locale. Use `:nth-child(
 | 9 | Fashion |
 | 10 | Letters |
 
-```javascript
-// browser_run_code code:
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   // Click "Animals" category (2nd button)
   await page.evaluate(() => {
@@ -207,20 +208,24 @@ async (page) => {
   await page.waitForTimeout(1000);
   return 'Filtered by Animals';
 }
+EOF
+)"
 ```
 
 ## Deleting the Default Sprite
 
 To remove the default cat sprite (Sprite1) before adding your own:
 
-```javascript
-// browser_evaluate function:
-() => {
+```bash
+playwright-cli run-code "$(cat <<'EOF'
+async page => await page.evaluate(() => {
   const vm = window.vm;
   const cat = vm.runtime.targets.find(t => t.sprite.name === 'Sprite1');
   if (cat) vm.deleteSprite(cat.id);
   return 'Default sprite deleted';
-}
+})
+EOF
+)"
 ```
 
 **Note:** This requires the VM to be connected first (see the `scratch-operation-code-injection` skill for the VM finder code).
@@ -311,8 +316,8 @@ To remove the default cat sprite (Sprite1) before adding your own:
 
 ## Complete Example: Add Hare and Frog for a Story
 
-```javascript
-// browser_run_code code:
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   // Helper: open sprite library via JS click (language-independent)
   const openSpriteLibrary = async () => {
@@ -366,6 +371,8 @@ async (page) => {
 
   return 'Added and renamed Hare → Rabbit, Frog → Turtle';
 }
+EOF
+)"
 ```
 
 ## Tips & Troubleshooting
@@ -380,7 +387,7 @@ async (page) => {
 
 ### Adding Multiple Sprites Quickly
 - The library dialog closes after each selection. You must re-open it for each sprite.
-- For batch additions, use the `browser_run_code` pattern with helper functions (see complete example above).
+- For batch additions, use the `playwright-cli run-code` pattern with helper functions (see complete example above).
 
 ### Sprite Position After Adding
 - Newly added sprites appear at a default position (often near center or slightly offset).

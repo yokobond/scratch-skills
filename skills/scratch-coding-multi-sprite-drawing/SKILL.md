@@ -39,17 +39,17 @@ Sprite2: [when I receive "draw"] -> [pen down] -> [repeat 4 ...]
 ## Prerequisites
 
 This skill builds on the **scratch-operation-code-injection** skill. Ensure:
-- The Playwright MCP server is configured
+- The `playwright-cli` skill is installed and a browser session is open
 - The Scratch editor is open and `window.vm` and `window.updateSprite` are available
 
 ## Implementation
 
 ### Block Definitions
 
-Use `browser_run_code` to inject all targets at once:
+Use `playwright-cli run-code` to inject all targets at once:
 
-```javascript
-// browser_run_code code:
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   await page.evaluate(async () => {
     // Ensure pen extension is loaded
@@ -125,6 +125,8 @@ async (page) => {
     window.vm.greenFlag();
   });
 }
+EOF
+)"
 ```
 
 ### Key Block Details

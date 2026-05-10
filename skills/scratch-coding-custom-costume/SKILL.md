@@ -27,16 +27,16 @@ Use the Scratch VM's **storage API** to create an image asset (SVG or PNG), wrap
 ## Prerequisites
 
 This skill builds on the **scratch-operation-code-injection** skill. Ensure:
-- The Playwright MCP server is configured
+- The `playwright-cli` skill is installed and a browser session is open
 - The Scratch editor is open and `window.vm` is available
 
 ## Implementation — SVG Costume
 
-Use `browser_evaluate` or `browser_run_code` to inject an SVG costume:
+Use `playwright-cli run-code` to inject an SVG costume:
 
-```javascript
-// browser_evaluate function:
-async () => {
+```bash
+playwright-cli run-code "$(cat <<'EOF'
+async page => await page.evaluate(async () => {
   const vm = window.vm;
   const target = vm.editingTarget;
   const storage = vm.runtime.storage;
@@ -79,17 +79,19 @@ async () => {
   target.setCostume(costumeIndex);
 
   return 'Costume added: ' + costume.name;
-}
+})
+EOF
+)"
 ```
 
 ## Implementation — PNG Costume
 
 ### From a Local File
 
-Use `browser_run_code` to read a local PNG file and inject it. The file is read via Playwright's `fs` access, converted to a base64 data URL, and passed into the page.
+Use `playwright-cli run-code` to read a local PNG file and inject it. The file is read via Node's `fs` (available in the `run-code` outer scope), converted to base64, and passed into the page.
 
-```javascript
-// browser_run_code code:
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   const fs = require('fs');
   const pngPath = '/absolute/path/to/image.png';
@@ -148,15 +150,17 @@ async (page) => {
     return `PNG costume added: ${img.width}x${img.height}`;
   }, pngBase64);
 }
+EOF
+)"
 ```
 
 ### From a Canvas (Programmatic Drawing)
 
 Generate a PNG entirely in the browser using an off-screen canvas:
 
-```javascript
-// browser_evaluate function:
-async () => {
+```bash
+playwright-cli run-code "$(cat <<'EOF'
+async page => await page.evaluate(async () => {
   const vm = window.vm;
   const target = vm.editingTarget;
   const storage = vm.runtime.storage;
@@ -213,7 +217,9 @@ async () => {
   target.setCostume(costumeIndex);
 
   return 'Canvas PNG costume added';
-}
+})
+EOF
+)"
 ```
 
 ## Common Operations
@@ -292,8 +298,8 @@ Perform `loadProject` and costume injection inside a **single `page.evaluate` ca
 
 **Key rule: add new costumes first, then delete old ones.** `deleteCostume` silently fails when only one costume remains in the list. Adding new costumes first guarantees the list always has more than one entry during deletion.
 
-```javascript
-// browser_run_code code:
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   const svg1 = `<svg ...>frame 1</svg>`;
   const svg2 = `<svg ...>frame 2</svg>`;
@@ -333,8 +339,10 @@ async (page) => {
     target.setCostume(0);
   }, [{ svg: svg1, name: 'frame1' }, { svg: svg2, name: 'frame2' }]);
 
-  window.vm.greenFlag();
+  await page.evaluate(() => window.vm.greenFlag());
 }
+EOF
+)"
 ```
 
 ### Anti-Patterns
@@ -386,8 +394,8 @@ Save your costume data before calling `loadProject`, then re-inject the costumes
 
 **For SVG** — data is a plain string, passed as an argument to `page.evaluate`:
 
-```javascript
-// browser_run_code code:
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   const svg1 = `<svg ...>...</svg>`;  // frame 1
   const svg2 = `<svg ...>...</svg>`;  // frame 2
@@ -429,12 +437,14 @@ async (page) => {
     target.setCostume(0);
   }, [{ svg: svg1, name: 'frame1' }, { svg: svg2, name: 'frame2' }]);
 }
+EOF
+)"
 ```
 
 **For PNG** — `Uint8Array` is not JSON-serializable, so convert to base64 before passing to `page.evaluate`, then decode inside:
 
-```javascript
-// browser_run_code code:
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   const fs = require('fs');
 
@@ -500,6 +510,8 @@ async (page) => {
     target.setCostume(0);
   }, [{ b64: png1b64, name: 'frame1' }, { b64: png2b64, name: 'frame2' }]);
 }
+EOF
+)"
 ```
 
 ### Why This Works

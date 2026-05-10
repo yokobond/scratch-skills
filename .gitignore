@@ -1,8 +1,8 @@
 # Temporary test artifacts — created by scratch-skill-tester
 tmp/
 
-# Playwright MCP temporary files
-.playwright-mcp/
+# Playwright temporary files
+.playwright-*/*
 
 # Installed agent skills (apm install, gh skill install)
 .claude/skills/

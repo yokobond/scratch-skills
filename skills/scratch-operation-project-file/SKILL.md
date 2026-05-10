@@ -10,20 +10,9 @@ This skill handles saving Scratch projects as `.sb3` files to the local filesyst
 
 ## Prerequisites
 
-This skill requires the **Playwright MCP server** to be installed and configured. Ensure the following is added to your MCP settings (e.g. `~/.claude/claude_desktop_config.json` or project `.mcp.json`):
+This skill drives the browser via the `playwright-cli` skill. Ensure that skill is installed and a browser session has been opened (e.g. `playwright-cli open --headed https://scratch.mit.edu/projects/editor/`).
 
-```json
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": ["@anthropic-ai/mcp-playwright@latest"]
-    }
-  }
-}
-```
-
-If the browser is not installed, run `browser_install` first to download the required Chromium binary.
+> **Visibility**: Always use `--headed` when opening the browser so that the Scratch editor is visible to the user during project creation.
 
 ## When to Use
 
@@ -34,7 +23,7 @@ If the browser is not installed, run `browser_install` first to download the req
 
 ## Downloading (Saving) a Project
 
-Use `browser_run_code` to trigger `vm.saveProjectSb3()`, create a download link, and capture the downloaded file via Playwright's download event.
+Use `playwright-cli run-code` to trigger `vm.saveProjectSb3()`, create a download link, and capture the downloaded file via Playwright's download event.
 
 ### Step 1: Ensure VM is Connected
 
@@ -42,8 +31,8 @@ The VM must be available as `window.vm`. If not, find it first (see `scratch-ope
 
 ### Step 2: Download the .sb3 File
 
-```javascript
-// browser_run_code code:
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   // Set up download handler BEFORE triggering download
   const downloadPromise = page.waitForEvent('download', { timeout: 10000 });
@@ -66,6 +55,8 @@ async (page) => {
   await download.saveAs('/absolute/path/to/my-project.sb3');
   return 'Saved to /absolute/path/to/my-project.sb3';
 }
+EOF
+)"
 ```
 
 **Key points:**
@@ -75,8 +66,8 @@ async (page) => {
 
 ### Complete Download Example
 
-```javascript
-// browser_run_code code:
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   const downloadPromise = page.waitForEvent('download', { timeout: 10000 });
 
@@ -99,6 +90,8 @@ async (page) => {
   await download.saveAs(savePath);
   return 'Project saved to: ' + savePath;
 }
+EOF
+)"
 ```
 
 ## Uploading (Loading) a Project
@@ -107,11 +100,11 @@ For a purely programmatic approach that bypasses the UI menu, read the file as b
 
 **Note:** This method works but does NOT update certain UI states (like the project title).
 
-```javascript
-// browser_run_code code:
+```bash
+playwright-cli run-code "$(cat <<'EOF'
 async (page) => {
   // Read the .sb3 file and convert to base64
-  const fs = require('fs');  // Only available in Node.js context (Playwright)
+  const fs = require('fs');  // Only available in the Node.js (run-code) context
   const fileBuffer = fs.readFileSync('/absolute/path/to/project.sb3');
   const base64 = fileBuffer.toString('base64');
 
@@ -130,27 +123,18 @@ async (page) => {
   await page.waitForTimeout(2000);
   return 'Project loaded via VM';
 }
+EOF
+)"
 ```
 
-**IMPORTANT:** `require('fs')` is available in Playwright's Node.js `browser_run_code` context but NOT inside `browser_evaluate` (which runs in the browser). The file must be read in the Node.js layer and passed to `page.evaluate`.
+**IMPORTANT:** `require('fs')` is available in the Node.js context that `playwright-cli run-code` provides, but NOT inside `page.evaluate()` (which runs in the browser). The file must be read in the outer (Node) layer and the data passed to `page.evaluate` as a JSON-serializable argument.
 
 ## Handling File Chooser Dialogs
 
-### Stale File Chooser Cleanup
-
-If multiple file chooser dialogs get queued up (e.g., from repeated download triggers), they must be dismissed one by one using `browser_file_upload` with no `paths` parameter (which cancels the dialog):
-
-```
-browser_file_upload
-// (no paths parameter = cancel)
-```
-
-Repeat until no more `[File chooser]` entries appear in the modal state.
-
 ### Avoiding Stale Dialogs
 
-- For downloads, always use the `downloadPromise` pattern (set up listener before triggering). This avoids stray file chooser dialogs.
-- For uploads via Method 1, always set up `fileChooserPromise` before clicking the menu.
+- For downloads, always use the `downloadPromise` pattern (set up listener before triggering). This avoids stray file chooser dialogs in the first place.
+- If a dialog is somehow left open, use `playwright-cli dialog-dismiss` to close it, or close the browser tab and re-open with `playwright-cli goto`.
 
 ## Tips & Troubleshooting
 
@@ -160,14 +144,15 @@ Repeat until no more `[File chooser]` entries appear in the modal state.
 
 ### File Chooser Dialog Not Appearing
 - The "Load from your computer" menu item internally clicks a hidden `<input type="file">`. If the menu is not found, verify the editor is fully loaded.
-- Use `browser_snapshot` to check the current page state.
+- Use `playwright-cli snapshot` to check the current page state.
 
 ### Project Not Fully Loading After Upload
 - Wait at least 2-3 seconds after loading for assets (costumes, sounds) to initialize.
 - After loading, re-find the VM reference as `loadProject` may invalidate previous references:
-  ```javascript
-  // browser_evaluate function:
-  () => {
+
+  ```bash
+  playwright-cli run-code "$(cat <<'EOF'
+  async page => await page.evaluate(() => {
     const el = document.querySelector('canvas');
     const key = Object.keys(el).find(k =>
       k.startsWith('__reactFiber') || k.startsWith('__reactInternalInstance')
@@ -178,17 +163,22 @@ Repeat until no more `[File chooser]` entries appear in the modal state.
       fiber = fiber.return;
     }
     return window.vm ? 'VM reconnected' : 'VM not found';
-  }
+  })
+  EOF
+  )"
   ```
 
 ### Verifying Project Contents After Load
-```javascript
-// browser_evaluate function:
-() => {
+
+```bash
+playwright-cli run-code "$(cat <<'EOF'
+async page => await page.evaluate(() => {
   const vm = window.vm;
   const sprites = vm.runtime.targets.map(t => t.sprite.name);
   const stage = vm.runtime.targets.find(t => t.isStage);
   const backdrops = stage.sprite.costumes.map(c => c.name);
   return { sprites, backdrops };
-}
+})
+EOF
+)"
 ```

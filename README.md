@@ -20,8 +20,20 @@ Agent skills for automating the Scratch editor via Playwright. Compatible with a
 
 ## Requirements
 
-- Playwright MCP server configured in your agent (e.g. `@playwright/mcp`)
-- Chromium installed for Playwright
+These skills delegate all browser automation to the `playwright-cli` skill (provided by the [`@playwright/cli`](https://www.npmjs.com/package/@playwright/cli) npm package). To set it up once on a new machine:
+
+```bash
+# 1. Install the CLI binary from npm
+npm install -g @playwright/cli
+
+# 2. Register the playwright-cli skill so your agent can discover it
+playwright-cli install --skills
+
+# 3. Install the Chromium browser used by Playwright
+playwright-cli install-browser
+```
+
+After this, agents that load the scratch-skills will be able to drive the Scratch editor through `playwright-cli` commands.
 
 ## Installation
 
