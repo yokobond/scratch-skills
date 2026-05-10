@@ -346,7 +346,130 @@ window.vm.emitWorkspaceUpdate();
 
 This is particularly useful when developing extensions or using internal APIs where a full project reload is overkill.
 
-### 8. Shadow Blocks (Important)
+**IMPORTANT**: `emitWorkspaceUpdate()` called immediately after `loadProject()` will NOT reliably show blocks. The GUI re-mounts the Blockly component asynchronously after `loadProject()`. Call `emitWorkspaceUpdate()` only after a ~1.5 second delay. See Tip #9 for the full reliable workflow.
+
+### 8. Showing Blocks in the Workspace After loadProject()
+
+After `loadProject()`, the Scratch GUI re-mounts the Blockly workspace component asynchronously. To reliably display blocks in the editor:
+
+**Step 1**: Call `loadProject()` and wait ~1.5 seconds for the component to re-mount:
+
+```bash
+playwright-cli run-code "$(cat <<'EOF'
+async (page) => {
+  await page.evaluate(async () => {
+    const vm = window.vm;
+    const projectJSON = JSON.parse(vm.toJSON());
+    // ... modify projectJSON.targets[spriteIndex].blocks ...
+    await vm.loadProject(JSON.stringify(projectJSON));
+  });
+  await page.waitForTimeout(1500);
+}
+EOF
+)"
+```
+
+**Step 2**: Emit the workspace update and scroll into view:
+
+```bash
+playwright-cli run-code "$(cat <<'EOF'
+async (page) => {
+  await page.evaluate(() => { window.vm.emitWorkspaceUpdate(); });
+  await page.waitForTimeout(1000);
+  await page.evaluate(() => {
+    const svgEl = document.querySelector('svg.blocklyWorkspace') ||
+                  document.querySelector('[class*="blocklyWorkspace"]')?.closest('svg');
+    let el = svgEl ? svgEl.parentElement : null;
+    for (let i = 0; i < 20 && el; i++) {
+      const keys = Object.keys(el);
+      const fk = keys.find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactInternalInstance$'));
+      if (fk) {
+        let fiber = el[fk];
+        while (fiber) {
+          if (fiber.stateNode && fiber.stateNode.workspace && fiber.stateNode.workspace.getAllBlocks) {
+            const ws = fiber.stateNode.workspace;
+            window._scratchWorkspace = ws;
+            ws.scrollCenter();
+            return ws.getAllBlocks().length + ' blocks visible';
+          }
+          fiber = fiber.return;
+        }
+      }
+      el = el.parentElement;
+    }
+  });
+}
+EOF
+)"
+```
+
+To zoom out and see all scripts at once:
+
+```bash
+playwright-cli run-code "$(cat <<'EOF'
+async page => await page.evaluate(() => {
+  const ws = window._scratchWorkspace;
+  if (!ws) return;
+  ws.setScale(0.6);
+  const blocks = ws.getTopBlocks(false);
+  if (blocks.length > 0) {
+    const bounds = blocks.reduce((b, blk) => {
+      const xy = blk.getRelativeToSurfaceXY();
+      return { minX: Math.min(b.minX, xy.x), minY: Math.min(b.minY, xy.y) };
+    }, { minX: Infinity, minY: Infinity });
+    ws.scroll(-bounds.minX * 0.6 + 20, -bounds.minY * 0.6 + 20);
+  }
+})
+EOF
+)"
+```
+
+### 9. Dynamic Menu Shadow Blocks — Workspace Display Limitation
+
+Some shadow blocks are **dynamically registered** based on the project's sprite list and are **NOT pre-registered** in ScratchBlocks. When `emitWorkspaceUpdate()` tries to render a script containing these blocks, the **entire script chain is silently dropped** from the workspace (the VM still runs it correctly).
+
+**Known problematic block** (causes "Invalid block definition" error in ScratchBlocks):
+- `sensing_distanceto_menu` — the dropdown for "distance to ▼"
+
+**Workaround**: Replace `sensing_distanceto` with `sensing_touchingobject` for mouse-proximity detection. The touching menu block works fine:
+
+```javascript
+// ❌ AVOID — sensing_distanceto_menu is not registered, whole script won't render
+'dist_sense': { opcode: 'sensing_distanceto', inputs: { DISTANCETOMENU: [1, 'dist_menu'] }, ... },
+'dist_menu':  { opcode: 'sensing_distanceto_menu', fields: { DISTANCETOMENU: ['_mouse_', null] }, shadow: true, ... },
+
+// ✅ USE INSTEAD — sensing_touchingobjectmenu works correctly
+'touch':   { opcode: 'sensing_touchingobject', inputs: { TOUCHINGOBJECTMENU: [1, 'touch_m'] }, ... },
+'touch_m': { opcode: 'sensing_touchingobjectmenu', fields: { TOUCHINGOBJECTMENU: ['_mouse_', null] }, shadow: true, ... },
+```
+
+**Menu shadow blocks confirmed to work** in the workspace:
+- `motion_goto_menu` (`_random_`, `_mouse_`)
+- `motion_pointtowards_menu` (`_mouse_`)
+- `sensing_touchingobjectmenu` (`_mouse_`, `_edge_`)
+- `sound_sounds_menu`
+
+**Sound name localization**: Sound names in `sound_sounds_menu` fields depend on the editor's display language. The default cat sprite's meow sound is `"Meow"` in English but `"ニャー"` in Japanese. Always confirm the actual sound name at runtime:
+```javascript
+const cat = vm.runtime.targets.find(t => !t.isStage);
+cat.sprite.sounds.map(s => s.name); // e.g. ["ニャー"]
+```
+
+### 10. DANGER — Do Not Call setEditingTarget() After loadProject()
+
+Calling `vm.setEditingTarget()` causes the Scratch GUI to **save the current workspace state back to the VM**. If the workspace is empty or partially rendered at that moment, it **overwrites the injected blocks with the empty state**, destroying your work.
+
+```javascript
+// ❌ NEVER DO THIS after loadProject() — destroys injected blocks
+vm.setEditingTarget(stageTarget.id);   // saves empty workspace → VM (wipes sprite blocks!)
+vm.setEditingTarget(spriteTarget.id);  // reloads from now-empty VM
+
+// ✅ CORRECT — let the GUI handle target selection on its own
+await vm.loadProject(JSON.stringify(projectJSON));
+// wait, then call emitWorkspaceUpdate() — do NOT touch setEditingTarget
+```
+
+### 11. Shadow Blocks (Important)
 
 When defining shadow blocks (e.g., dropdown menus, number inputs) in your `blocks` object, follow these rules to ensure they are correctly rendered and persisted:
 
