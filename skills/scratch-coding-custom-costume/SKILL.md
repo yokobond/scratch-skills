@@ -26,7 +26,7 @@ Use the Scratch VM's **storage API** to create an image asset (SVG or PNG), wrap
 
 ## Prerequisites
 
-This skill builds on the **scratch-operation-code-injection** skill. Ensure:
+This skill builds on the **scratch-project-edit** skill. Ensure:
 - The `playwright-cli` skill is installed and a browser session is open
 - The Scratch editor is open and `window.vm` is available
 
@@ -384,7 +384,7 @@ The fix: **add new costumes first, then delete old ones** (see Correct Pattern a
 
 ### The Problem
 
-`vm.loadProject()` (used by the **scratch-operation-code-injection** skill's `updateSprite` helper) **destroys all locally-injected costumes**. When the project is reloaded, Scratch tries to fetch every asset by its md5 hash from the remote CDN (`api.scratch.mit.edu`). Locally created assets have never been uploaded there, so the fetch fails and the costume appears as a "?" placeholder.
+`vm.loadProject()` (used by the **scratch-project-edit** skill's `updateSprite` helper) **destroys all locally-injected costumes**. When the project is reloaded, Scratch tries to fetch every asset by its md5 hash from the remote CDN (`api.scratch.mit.edu`). Locally created assets have never been uploaded there, so the fetch fails and the costume appears as a "?" placeholder.
 
 This affects both SVG and PNG costumes equally.
 

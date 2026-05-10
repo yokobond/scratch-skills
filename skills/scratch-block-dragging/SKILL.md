@@ -1,5 +1,5 @@
 ---
-name: scratch-operation-block-dragging
+name: scratch-block-dragging
 description: Builds Scratch programs by dragging and dropping blocks from the palette to the script area using Playwright mouse operations. Use this skill when you need to visually assemble Scratch code through the editor UI rather than injecting via the VM.
 license: MIT
 ---

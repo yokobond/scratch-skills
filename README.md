@@ -6,10 +6,10 @@ Agent skills for automating the Scratch editor via Playwright. Compatible with a
 
 ### Editor Operations
 
-- **scratch-operation-code-injection** — Injects blocks directly into the Scratch VM by serializing/deserializing the project JSON. Best for programmatically creating complete Scratch programs quickly.
-- **scratch-operation-block-dragging** — Builds Scratch programs by dragging and dropping blocks from the palette to the script area using mouse operations. Mimics real user interaction with the Scratch editor UI.
-- **scratch-operation-project-file** — Download and upload Scratch project `.sb3` files.
-- **scratch-operation-project-reader** — Read and summarize all sprites, scripts, and variables in the currently loaded project. Works with both new and existing public projects.
+- **scratch-project-edit** — Injects blocks directly into the Scratch VM by serializing/deserializing the project JSON. Best for programmatically creating complete Scratch programs quickly.
+- **scratch-block-dragging** — Builds Scratch programs by dragging and dropping blocks from the palette to the script area using mouse operations. Mimics real user interaction with the Scratch editor UI.
+- **scratch-project-file** — Download and upload Scratch project `.sb3` files.
+- **scratch-project-inspect** — Read and summarize all sprites, scripts, and variables in the currently loaded project. Works with both new and existing public projects.
 
 ### Coding Patterns
 
@@ -46,7 +46,7 @@ gh skill install yokobond/scratch-skills
 Install a single skill:
 
 ```bash
-gh skill install yokobond/scratch-skills scratch-operation-code-injection
+gh skill install yokobond/scratch-skills scratch-project-edit
 ```
 
 ### APM

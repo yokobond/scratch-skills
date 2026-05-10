@@ -1,5 +1,5 @@
 ---
-name: scratch-operation-project-reader
+name: scratch-project-inspect
 description: Reads and summarizes the code of the Scratch project currently loaded in the editor. Use this skill when you need to inspect what sprites, scripts, and blocks exist in the project before making changes.
 license: MIT
 ---
@@ -10,7 +10,7 @@ This skill reads the project JSON from the Scratch VM and extracts a human-reada
 
 ## Prerequisites
 
-This skill drives the browser via the `playwright-cli` skill. Ensure that skill is installed and the Scratch editor is open in the browser session (see `scratch-operation-code-injection` skill for opening it).
+This skill drives the browser via the `playwright-cli` skill. Ensure that skill is installed and the Scratch editor is open in the browser session (see `scratch-project-edit` skill for opening it).
 
 ---
 
@@ -240,8 +240,8 @@ EOF
 ### 1. Run Step 2 before reading any script
 Always check the summary first. It tells you which sprite names and opcodes exist, preventing wasted injection attempts.
 
-### 2. Combine with `scratch-operation-code-injection` when editing
-After reading the project to understand its structure, use `window.updateSprite` from the `scratch-operation-code-injection` skill to make changes. Use the raw block IDs from Step 4 as anchors.
+### 2. Combine with `scratch-project-edit` when editing
+After reading the project to understand its structure, use `window.updateSprite` from the `scratch-project-edit` skill to make changes. Use the raw block IDs from Step 4 as anchors.
 
 ### 3. Shadow blocks are skipped intentionally
 Shadow blocks (e.g., default numeric literal inputs) are omitted from the summary to reduce noise. Use Step 4 (raw JSON) if you need them.

@@ -18,7 +18,7 @@ Read the user's description carefully. Identify:
 
 ### 1.2 Open the Scratch Editor
 
-Use the `scratch-operation-code-injection` skill to open the editor and connect to the VM:
+Use the `scratch-project-edit` skill to open the editor and connect to the VM:
 
 ```bash
 playwright-cli open --headed https://scratch.mit.edu/projects/editor/
@@ -53,7 +53,7 @@ Anything that wasn't already obvious from existing skills is worth logging.
 
 ### 1.5 Save the Project to a File
 
-Once the program is working correctly, **save the project as an `.sb3` file** using the `scratch-operation-project-file` skill. This preserves the working implementation as a reference artifact alongside the new skill.
+Once the program is working correctly, **save the project as an `.sb3` file** using the `scratch-project-file` skill. This preserves the working implementation as a reference artifact alongside the new skill.
 
 Save path convention:
 
@@ -61,7 +61,7 @@ Save path convention:
 skills/<skill-name>/example.sb3
 ```
 
-Use the download pattern from `scratch-operation-project-file`:
+Use the download pattern from `scratch-project-file`:
 
 ```bash
 playwright-cli run-code "$(cat <<'EOF'

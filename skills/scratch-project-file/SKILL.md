@@ -1,5 +1,5 @@
 ---
-name: scratch-operation-project-file
+name: scratch-project-file
 description: Downloads (saves) and uploads (loads) Scratch project .sb3 files. Use this skill when you need to save a Scratch project to a local file or load a previously saved .sb3 file into the editor.
 license: MIT
 ---
@@ -27,7 +27,7 @@ Use `playwright-cli run-code` to trigger `vm.saveProjectSb3()`, create a downloa
 
 ### Step 1: Ensure VM is Connected
 
-The VM must be available as `window.vm`. If not, find it first (see `scratch-operation-code-injection` skill).
+The VM must be available as `window.vm`. If not, find it first (see `scratch-project-edit` skill).
 
 ### Step 2: Download the .sb3 File
 

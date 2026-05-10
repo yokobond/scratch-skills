@@ -38,7 +38,7 @@ Sprite2: [when I receive "draw"] -> [pen down] -> [repeat 4 ...]
 
 ## Prerequisites
 
-This skill builds on the **scratch-operation-code-injection** skill. Ensure:
+This skill builds on the **scratch-project-edit** skill. Ensure:
 - The `playwright-cli` skill is installed and a browser session is open
 - The Scratch editor is open and `window.vm` and `window.updateSprite` are available
 

@@ -36,7 +36,7 @@ Construct the prompt as follows:
 ```
 You are a Scratch programming agent. Your job is to build a working Scratch program
 using ONLY the instructions in the skill file provided below. Do not rely on any
-knowledge beyond what the skill file contains plus the general scratch-operation-code-injection
+knowledge beyond what the skill file contains plus the general scratch-project-edit
 and scratch-operation skills you already know.
 
 ## Skill to Test
@@ -58,8 +58,8 @@ and what the user should observe when they click the green flag>
 2. Connect to the VM using the standard approach
 3. Implement the program using ONLY the pattern described in the skill above
 4. Run the program and take a screenshot; save the screenshot to `./tmp/<skill-name>/screenshot-build.png`
-5. Run `mkdir -p ./tmp/<skill-name>` to create the directory, then save the project as an .sb3 file to the save path above using the scratch-operation-project-file download pattern
-6. **Reload test**: Load the saved `.sb3` file back into the Scratch editor using the scratch-operation-project-file load pattern, then click the green flag and confirm the program runs correctly. Take a screenshot and save it to `./tmp/<skill-name>/screenshot-reload.png`
+5. Run `mkdir -p ./tmp/<skill-name>` to create the directory, then save the project as an .sb3 file to the save path above using the scratch-project-file download pattern
+6. **Reload test**: Load the saved `.sb3` file back into the Scratch editor using the scratch-project-file load pattern, then click the green flag and confirm the program runs correctly. Take a screenshot and save it to `./tmp/<skill-name>/screenshot-reload.png`
 7. Report the result in this format:
 
 ### Test Report

@@ -228,7 +228,7 @@ EOF
 )"
 ```
 
-**Note:** This requires the VM to be connected first (see the `scratch-operation-code-injection` skill for the VM finder code).
+**Note:** This requires the VM to be connected first (see the `scratch-project-edit` skill for the VM finder code).
 
 ## Available Sprites Reference
 
