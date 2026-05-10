@@ -10,13 +10,10 @@ Agent skills for automating the Scratch editor via Playwright. Compatible with a
 - **scratch-block-dragging** — Builds Scratch programs by dragging and dropping blocks from the palette to the script area using mouse operations. Mimics real user interaction with the Scratch editor UI.
 - **scratch-project-file** — Download and upload Scratch project `.sb3` files.
 - **scratch-project-inspect** — Read and summarize all sprites, scripts, and variables in the currently loaded project. Works with both new and existing public projects.
+- **scratch-sprite-library** — Add sprites and backdrops from the Scratch built-in library.
+- **scratch-costume-insert** — Add custom SVG or PNG costumes to sprites programmatically.
 
-### Coding Patterns
-
-- **scratch-coding-sprite-library** — Add sprites and backdrops from the Scratch built-in library.
-- **scratch-coding-custom-costume** — Add custom SVG or PNG costumes to sprites programmatically.
-- **scratch-coding-storytelling-messaging** — Patterns for sequential dialog and messages.
-- **scratch-coding-multi-sprite-drawing** — Coordinate multiple sprites drawing simultaneously.
+> **Coding patterns** (multi-sprite drawing, storytelling messaging) and skill-authoring workflows live in the companion repo [yokobond/scratch-coding-skills](https://github.com/yokobond/scratch-coding-skills), which depends on this one via APM.
 
 ## Requirements
 

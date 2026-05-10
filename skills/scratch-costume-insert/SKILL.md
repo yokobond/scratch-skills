@@ -1,5 +1,5 @@
 ---
-name: scratch-coding-custom-costume
+name: scratch-costume-insert
 description: Add custom SVG or PNG costumes to sprites programmatically via the Scratch VM storage API. Enables creating original characters, shapes, or artwork without using the paint editor UI.
 license: MIT
 ---
@@ -608,5 +608,5 @@ storage.createAsset(
 
 ## When NOT to Use This Pattern
 
-- **Library sprites**: If a suitable costume exists in the Scratch sprite library, use the **scratch-coding-sprite-library** skill to add it from the UI instead
+- **Library sprites**: If a suitable costume exists in the Scratch sprite library, use the **scratch-sprite-library** skill to add it from the UI instead
 - **Interactive drawing**: If the user needs to draw or edit the costume themselves through the paint editor

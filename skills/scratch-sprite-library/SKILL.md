@@ -1,5 +1,5 @@
 ---
-name: scratch-coding-sprite-library
+name: scratch-sprite-library
 description: Adds sprites and backdrops from the Scratch built-in library via the editor UI. Use this skill when you need to add pre-made characters, animals, objects, or backgrounds to a Scratch project.
 license: MIT
 ---
