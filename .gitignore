@@ -4,7 +4,7 @@ tmp/
 # Playwright temporary files
 .playwright-*/*
 
-# Installed agent skills (apm install, gh skill install)
-.claude/skills/
-.github/skills/
-.cursor/skills/
+# Local Agent files
+.claude/
+.github/
+.cursor/
